@@ -61,7 +61,6 @@ export default function AdminPortal() {
   const totalLoans = applications.length
   const totalLoanValue = applications.reduce((sum, app) => sum + (app.loan_amount || 0), 0)
   const totalFunded = 0 // Will implement when we have loans table data
-  const activeLoans = applications.filter(app => app.status === 'submitted').length
   const pendingReview = applications.filter(app => app.status === 'submitted').length
   const approvalRate = totalLoans > 0 ? Math.round((applications.filter(app => app.status !== 'rejected').length / totalLoans) * 100) : 0
 
