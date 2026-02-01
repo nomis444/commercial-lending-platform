@@ -1,19 +1,69 @@
 'use client'
 
-import { useState } from 'react'
-import { mockLoans, mockNotifications, formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/mock/data'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { demoAuth } from '@/lib/demo/auth'
+import { createClient } from '@supabase/supabase-js'
+import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/mock/data'
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+interface Application {
+  id: string
+  status: string
+  loan_amount: number
+  loan_purpose: string
+  business_info: any
+  financial_info: any
+  created_at: string
+}
 
 export default function AdminPortal() {
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedLoan, setSelectedLoan] = useState<string | null>(null)
+  const [applications, setApplications] = useState<Application[]>([])
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    const user = demoAuth.getCurrentUser()
+    if (!user || user.role !== 'admin') {
+      router.push('/login')
+      return
+    }
+
+    fetchApplications()
+  }, [router])
+
+  const fetchApplications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching applications:', error)
+      } else {
+        setApplications(data || [])
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
   
   // Admin stats calculations
-  const totalLoans = mockLoans.length
-  const totalLoanValue = mockLoans.reduce((sum, loan) => sum + loan.loanAmount, 0)
-  const totalFunded = mockLoans.reduce((sum, loan) => sum + loan.fundedAmount, 0)
-  const activeLoans = mockLoans.filter(loan => loan.status === 'funded' || loan.status === 'active').length
-  const pendingReview = mockLoans.filter(loan => loan.status === 'under_review').length
-  const approvalRate = Math.round((mockLoans.filter(loan => loan.status !== 'rejected').length / totalLoans) * 100)
+  const totalLoans = applications.length
+  const totalLoanValue = applications.reduce((sum, app) => sum + (app.loan_amount || 0), 0)
+  const totalFunded = 0 // Will implement when we have loans table data
+  const activeLoans = applications.filter(app => app.status === 'submitted').length
+  const pendingReview = applications.filter(app => app.status === 'submitted').length
+  const approvalRate = totalLoans > 0 ? Math.round((applications.filter(app => app.status !== 'rejected').length / totalLoans) * 100) : 0
 
   const handleLoanAction = (loanId: string, action: string) => {
     alert(`${action} action for loan ${loanId} executed! (Demo mode)`)
@@ -253,49 +303,71 @@ export default function AdminPortal() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {mockLoans.map((loan) => (
-              <tr key={loan.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{loan.businessName}</div>
-                    <div className="text-sm text-gray-500">{loan.industry}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{formatCurrency(loan.loanAmount)}</div>
-                  <div className="text-sm text-gray-500">{loan.loanPurpose}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
-                    {loan.status.replace('_', ' ').toUpperCase()}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(loan.riskRating)}`}>
-                    {loan.riskRating.toUpperCase()}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(loan.appliedDate)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => setSelectedLoan(selectedLoan === loan.id ? null : loan.id)}
-                    className="text-blue-600 hover:text-blue-900 mr-3"
-                  >
-                    View
-                  </button>
-                  {loan.status === 'under_review' && (
-                    <button
-                      onClick={() => handleLoanAction(loan.id, 'Review')}
-                      className="text-green-600 hover:text-green-900"
-                    >
-                      Review
-                    </button>
-                  )}
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  Loading applications...
                 </td>
               </tr>
-            ))}
+            ) : applications.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  No applications found. Submit an application to see it here!
+                </td>
+              </tr>
+            ) : (
+              applications.map((app) => (
+                <tr key={app.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {app.business_info?.businessName || 'N/A'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {app.business_info?.industry || 'N/A'}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {formatCurrency(app.loan_amount || 0)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {app.loan_purpose || 'N/A'}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(app.status)}`}>
+                      {app.status.replace('_', ' ').toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor('medium')}`}>
+                      MEDIUM
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatDate(app.created_at)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => setSelectedLoan(selectedLoan === app.id ? null : app.id)}
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                    >
+                      View
+                    </button>
+                    {app.status === 'submitted' && (
+                      <button
+                        onClick={() => handleLoanAction(app.id, 'Review')}
+                        className="text-green-600 hover:text-green-900"
+                      >
+                        Review
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

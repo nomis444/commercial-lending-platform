@@ -1,5 +1,11 @@
 import { ApplicationSession, ApplicationStep } from './types'
 import { APPLICATION_STEPS, getStepById, getNextStep } from './steps'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export class ApplicationEngine {
   private sessions: Map<string, ApplicationSession> = new Map()
@@ -94,18 +100,89 @@ export class ApplicationEngine {
   }
 
   // Submit application
-  submitApplication(sessionId: string): ApplicationSession | null {
+  async submitApplication(sessionId: string): Promise<ApplicationSession | null> {
     const session = this.getSession(sessionId)
     if (!session) return null
 
-    // Simple approach: just allow submission and mark as submitted
-    // The UI should only show the submit button on the review step anyway
-    session.status = 'submitted'
-    session.updatedAt = new Date()
-    this.sessions.set(sessionId, session)
+    try {
+      // Create a default tenant for demo purposes
+      const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('name', 'Demo Tenant')
+        .single()
 
-    console.log('Application submitted successfully:', session)
-    return session
+      let tenantId = tenant?.id
+
+      if (!tenant) {
+        // Create demo tenant if it doesn't exist
+        const { data: newTenant, error: createTenantError } = await supabase
+          .from('tenants')
+          .insert({
+            name: 'Demo Tenant',
+            type: 'borrower'
+          })
+          .select('id')
+          .single()
+
+        if (createTenantError) {
+          console.error('Error creating tenant:', createTenantError)
+          throw new Error('Failed to create tenant')
+        }
+
+        tenantId = newTenant.id
+      }
+
+      // Save application to Supabase
+      const { data: application, error: appError } = await supabase
+        .from('applications')
+        .insert({
+          tenant_id: tenantId,
+          status: 'submitted',
+          loan_amount: session.formData.loanAmount,
+          loan_purpose: session.formData.loanPurpose,
+          business_info: {
+            businessName: session.formData.businessName,
+            businessType: session.formData.businessType,
+            yearsInBusiness: session.formData.yearsInBusiness,
+            industry: session.formData.industry,
+            streetAddress: session.formData.streetAddress,
+            city: session.formData.city,
+            state: session.formData.state,
+            zipCode: session.formData.zipCode
+          },
+          financial_info: {
+            annualRevenue: session.formData.annualRevenue,
+            monthlyRevenue: session.formData.monthlyRevenue,
+            monthlyExpenses: session.formData.monthlyExpenses,
+            existingDebt: session.formData.existingDebt,
+            bankName: session.formData.bankName,
+            accountType: session.formData.accountType,
+            averageBalance: session.formData.averageBalance
+          },
+          step_data: session.formData,
+          current_step: 'review'
+        })
+        .select()
+        .single()
+
+      if (appError) {
+        console.error('Error saving application:', appError)
+        throw new Error('Failed to save application')
+      }
+
+      // Update session status
+      session.status = 'submitted'
+      session.updatedAt = new Date()
+      this.sessions.set(sessionId, session)
+
+      console.log('Application submitted successfully to Supabase:', application)
+      return session
+
+    } catch (error) {
+      console.error('Submission error:', error)
+      throw error
+    }
   }
 
   // Get application progress

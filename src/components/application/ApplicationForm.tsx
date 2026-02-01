@@ -144,8 +144,8 @@ export default function ApplicationForm({ sessionId, onComplete }: ApplicationFo
       // Save the review step data
       applicationEngine.saveStepData(session.id, formData)
 
-      // Now submit the application
-      const submittedSession = applicationEngine.submitApplication(session.id)
+      // Now submit the application (this is now async)
+      const submittedSession = await applicationEngine.submitApplication(session.id)
       if (submittedSession && onComplete) {
         onComplete(submittedSession)
       }
