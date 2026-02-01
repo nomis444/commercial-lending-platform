@@ -1,6 +1,7 @@
 import { ApplicationSession, ApplicationStep } from './types'
 import { APPLICATION_STEPS, getStepById, getNextStep } from './steps'
 import { createClient } from '@supabase/supabase-js'
+import { getLoanProduct, LoanProductType } from './products'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spznjpzxpssxvgcksgxh.supabase.co'
@@ -11,13 +12,18 @@ export class ApplicationEngine {
   private sessions: Map<string, ApplicationSession> = new Map()
 
   // Start a new application session
-  startApplication(initialData?: Record<string, any>): ApplicationSession {
+  startApplication(initialData?: Record<string, any>, productType?: string): ApplicationSession {
     const sessionId = this.generateSessionId()
+    const product = getLoanProduct(productType || null)
+    
     const session: ApplicationSession = {
       id: sessionId,
       currentStep: 'welcome',
       completedSteps: [],
-      formData: initialData || {},
+      formData: {
+        ...initialData,
+        productType: product.id
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
       status: 'draft'
@@ -36,6 +42,15 @@ export class ApplicationEngine {
   getCurrentStep(sessionId: string): ApplicationStep | null {
     const session = this.getSession(sessionId)
     if (!session) return null
+
+    const stepId = session.currentStep
+    
+    // Handle dynamic loan_details step
+    if (stepId === 'loan_details') {
+      const { getLoanDetailsStep } = require('./steps')
+      const productType = session.formData.productType as LoanProductType
+      return getLoanDetailsStep(productType)
+    }
 
     return getStepById(session.currentStep) || null
   }
@@ -63,12 +78,31 @@ export class ApplicationEngine {
     return session
   }
 
+  // Check if step is required for current product
+  isStepRequired(sessionId: string, stepId: string): boolean {
+    const session = this.getSession(sessionId)
+    if (!session) return true // Default to required if no session
+    
+    const productType = session.formData.productType as LoanProductType
+    if (!productType) return true // Default to required if no product type
+    
+    const product = getLoanProduct(productType)
+    return product.requiredSteps.includes(stepId)
+  }
+
   // Move to next step
   moveToNextStep(sessionId: string): ApplicationSession | null {
     const session = this.getSession(sessionId)
     if (!session) return null
 
-    const nextStepId = getNextStep(session.currentStep, session.formData)
+    let nextStepId = getNextStep(session.currentStep, session.formData)
+    
+    // Skip steps not required for this product
+    while (nextStepId && !this.isStepRequired(sessionId, nextStepId)) {
+      const tempNextStepId = getNextStep(nextStepId, session.formData)
+      if (tempNextStepId === nextStepId) break // Prevent infinite loop
+      nextStepId = tempNextStepId
+    }
     
     if (nextStepId) {
       session.currentStep = nextStepId
@@ -90,10 +124,16 @@ export class ApplicationEngine {
     if (!session) return null
 
     const currentStepIndex = APPLICATION_STEPS.findIndex(step => step.id === session.currentStep)
-    if (currentStepIndex > 0) {
-      session.currentStep = APPLICATION_STEPS[currentStepIndex - 1].id
-      session.updatedAt = new Date()
-      this.sessions.set(sessionId, session)
+    
+    // Find previous required step
+    for (let i = currentStepIndex - 1; i >= 0; i--) {
+      const stepId = APPLICATION_STEPS[i].id
+      if (this.isStepRequired(sessionId, stepId)) {
+        session.currentStep = stepId
+        session.updatedAt = new Date()
+        this.sessions.set(sessionId, session)
+        break
+      }
     }
 
     return session

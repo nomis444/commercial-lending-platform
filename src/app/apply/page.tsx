@@ -1,15 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import ApplicationForm from '@/components/application/ApplicationForm'
 import { ApplicationSession } from '@/lib/application/types'
 import { demoAuth } from '@/lib/demo/auth'
+import { getLoanProduct } from '@/lib/application/products'
 
-export default function ApplyPage() {
+function ApplyPageContent() {
   const [isCompleted, setIsCompleted] = useState(false)
   const [completedSession, setCompletedSession] = useState<ApplicationSession | null>(null)
+  const [productType, setProductType] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // Get product type from URL parameter
+    const product = searchParams.get('product')
+    setProductType(product)
+  }, [searchParams])
 
   const handleApplicationComplete = (session: ApplicationSession) => {
     setCompletedSession(session)
@@ -28,6 +37,8 @@ export default function ApplyPage() {
   }
 
   if (isCompleted && completedSession) {
+    const product = getLoanProduct(completedSession.formData.productType)
+    
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-2xl mx-auto p-6">
@@ -45,12 +56,13 @@ export default function ApplyPage() {
             </h2>
             
             <p className="text-gray-600 mb-6">
-              Thank you for your loan application. We've received your information and will begin processing it immediately.
+              Thank you for your {product.name} loan application. We've received your information and will begin processing it immediately.
             </p>
             
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
               <div className="text-sm text-blue-800">
                 <p><strong>Application ID:</strong> {completedSession.id}</p>
+                <p><strong>Product:</strong> {product.name}</p>
                 <p><strong>Submitted:</strong> {completedSession.updatedAt.toLocaleString()}</p>
                 <p><strong>Loan Amount:</strong> ${Number(completedSession.formData.loanAmount || 0).toLocaleString()}</p>
               </div>
@@ -98,20 +110,41 @@ export default function ApplyPage() {
     )
   }
 
+  const product = productType ? getLoanProduct(productType) : null
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Commercial Loan Application
+            {product ? `${product.name} Loan Application` : 'Commercial Loan Application'}
           </h1>
           <p className="text-lg text-gray-600">
             Complete your application in just a few simple steps. We'll guide you through the process.
           </p>
+          {product && (
+            <div className="mt-4 inline-block bg-blue-50 px-4 py-2 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Loan Range:</strong> ${product.minAmount.toLocaleString()} - ${product.maxAmount.toLocaleString()}
+              </p>
+            </div>
+          )}
         </div>
         
-        <ApplicationForm onComplete={handleApplicationComplete} />
+        <ApplicationForm onComplete={handleApplicationComplete} productType={productType} />
       </div>
     </div>
+  )
+}
+
+export default function ApplyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 py-12 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <ApplyPageContent />
+    </Suspense>
   )
 }

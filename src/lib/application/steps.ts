@@ -1,4 +1,75 @@
 import { ApplicationStep } from './types'
+import { getLoanProduct, LoanProductType, LOAN_PRODUCTS } from './products'
+
+// Get dynamic loan details step based on product type
+export function getLoanDetailsStep(productType?: LoanProductType): ApplicationStep {
+  const product = productType ? LOAN_PRODUCTS[productType] : LOAN_PRODUCTS.standard
+  
+  return {
+    id: 'loan_details',
+    title: 'Loan Requirements',
+    description: 'What are you looking to borrow and why?',
+    fields: [
+      {
+        id: 'loanAmount',
+        name: 'loanAmount',
+        label: 'Loan Amount Requested',
+        type: 'number',
+        required: true,
+        placeholder: product.minAmount.toString(),
+        helpText: `Enter the amount you need to borrow ($${product.minAmount.toLocaleString()} - $${product.maxAmount.toLocaleString()})`,
+        validation: [
+          { type: 'required', message: 'Loan amount is required' },
+          { type: 'min', value: product.minAmount, message: `Minimum loan amount is $${product.minAmount.toLocaleString()}` },
+          { type: 'max', value: product.maxAmount, message: `Maximum loan amount is $${product.maxAmount.toLocaleString()}` }
+        ]
+      },
+      {
+        id: 'loanPurpose',
+        name: 'loanPurpose',
+        label: 'Purpose of Loan',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'working_capital', label: 'Working Capital' },
+          { value: 'equipment', label: 'Equipment Purchase' },
+          { value: 'expansion', label: 'Business Expansion' },
+          { value: 'inventory', label: 'Inventory' },
+          { value: 'real_estate', label: 'Real Estate' },
+          { value: 'debt_consolidation', label: 'Debt Consolidation' },
+          { value: 'other', label: 'Other' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select the purpose of your loan' }
+        ]
+      },
+      {
+        id: 'loanTerm',
+        name: 'loanTerm',
+        label: 'Preferred Loan Term',
+        type: 'select',
+        required: true,
+        options: product.termOptions.map(term => ({
+          value: term.toString(),
+          label: `${term} months`
+        })),
+        helpText: 'Longer terms have lower monthly payments but higher total interest',
+        validation: [
+          { type: 'required', message: 'Please select your preferred loan term' }
+        ]
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'financial_info',
+    conditionalLogic: [
+      {
+        condition: { field: 'loanAmount', operator: 'greater_than', value: 500000 },
+        action: 'show_step',
+        target: 'additional_docs'
+      }
+    ]
+  }
+}
 
 export const APPLICATION_STEPS: ApplicationStep[] = [
   {

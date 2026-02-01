@@ -6,13 +6,16 @@ import { ApplicationEngine, applicationEngine } from '@/lib/application/engine'
 import { ApplicationSession, ApplicationStep, FormField } from '@/lib/application/types'
 import FormFieldComponent from './FormField'
 import ProgressBar from './ProgressBar'
+import PaymentCalculator from './PaymentCalculator'
+import { LoanProductType } from '@/lib/application/products'
 
 interface ApplicationFormProps {
   sessionId?: string
   onComplete?: (session: ApplicationSession) => void
+  productType?: string | null
 }
 
-export default function ApplicationForm({ sessionId, onComplete }: ApplicationFormProps) {
+export default function ApplicationForm({ sessionId, onComplete, productType }: ApplicationFormProps) {
   const [session, setSession] = useState<ApplicationSession | null>(null)
   const [currentStep, setCurrentStep] = useState<ApplicationStep | null>(null)
   const [formData, setFormData] = useState<Record<string, any>>({})
@@ -31,13 +34,13 @@ export default function ApplicationForm({ sessionId, onComplete }: ApplicationFo
         setCurrentStep(step)
       }
     } else {
-      // Start new session
-      const newSession = applicationEngine.startApplication()
+      // Start new session with product type
+      const newSession = applicationEngine.startApplication({}, productType || undefined)
       setSession(newSession)
       const step = applicationEngine.getCurrentStep(newSession.id)
       setCurrentStep(step)
     }
-  }, [sessionId])
+  }, [sessionId, productType])
 
   const handleFieldChange = (fieldName: string, value: any) => {
     setFormData(prev => ({
@@ -263,6 +266,15 @@ export default function ApplicationForm({ sessionId, onComplete }: ApplicationFo
             ))}
           </div>
 
+          {/* Payment Calculator for Loan Details Step */}
+          {currentStep.id === 'loan_details' && formData.loanAmount && formData.loanTerm && (
+            <PaymentCalculator
+              loanAmount={Number(formData.loanAmount)}
+              termMonths={Number(formData.loanTerm)}
+              productType={(formData.productType || 'standard') as LoanProductType}
+            />
+          )}
+
           {/* Review Section for Last Step */}
           {isLastStep && (
             <div className="mt-8 p-6 bg-gray-50 rounded-lg">
@@ -287,6 +299,17 @@ export default function ApplicationForm({ sessionId, onComplete }: ApplicationFo
                   <strong>Annual Revenue:</strong> ${Number(formData.annualRevenue || 0).toLocaleString()}
                 </div>
               </div>
+              
+              {/* Payment Details in Review */}
+              {formData.loanAmount && formData.loanTerm && (
+                <div className="mt-6">
+                  <PaymentCalculator
+                    loanAmount={Number(formData.loanAmount)}
+                    termMonths={Number(formData.loanTerm)}
+                    productType={(formData.productType || 'standard') as LoanProductType}
+                  />
+                </div>
+              )}
             </div>
           )}
 
