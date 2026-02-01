@@ -22,7 +22,7 @@ export default function PublicHeader() {
     }
   }
 
-  const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_project_url'
+  const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_project_url' || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://spznjpzxpssxvgcksgxh.supabase.co'
 
   return (
     <>
