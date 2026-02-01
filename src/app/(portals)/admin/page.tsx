@@ -133,11 +133,11 @@ export default function AdminPortal() {
       {/* Status Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Loan Status Distribution</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Application Status Distribution</h3>
           <div className="space-y-3">
-            {['pending', 'under_review', 'approved', 'funded', 'active', 'rejected'].map(status => {
-              const count = mockLoans.filter(loan => loan.status === status).length
-              const percentage = Math.round((count / totalLoans) * 100)
+            {['submitted', 'under_review', 'approved', 'funded', 'active', 'rejected'].map(status => {
+              const count = applications.filter(app => app.status === status).length
+              const percentage = totalLoans > 0 ? Math.round((count / totalLoans) * 100) : 0
               return (
                 <div key={status} className="flex justify-between items-center">
                   <span className={`px-2 py-1 rounded text-sm ${getStatusColor(status)}`}>
@@ -163,8 +163,9 @@ export default function AdminPortal() {
           <h3 className="text-xl font-bold text-gray-900 mb-4">Risk Distribution</h3>
           <div className="space-y-3">
             {['low', 'medium', 'high'].map(risk => {
-              const count = mockLoans.filter(loan => loan.riskRating === risk).length
-              const percentage = Math.round((count / totalLoans) * 100)
+              // For now, show even distribution since we don't have risk ratings in real data yet
+              const count = Math.floor(applications.length / 3)
+              const percentage = totalLoans > 0 ? Math.round((count / totalLoans) * 100) : 0
               return (
                 <div key={risk} className="flex justify-between items-center">
                   <span className={`px-2 py-1 rounded text-sm ${getRiskColor(risk)}`}>
@@ -214,25 +215,24 @@ export default function AdminPortal() {
           <h3 className="text-xl font-bold text-gray-900">Loans Requiring Action</h3>
         </div>
         <div className="divide-y divide-gray-200">
-          {mockLoans.filter(loan => loan.status === 'under_review').map((loan) => (
-            <div key={loan.id} className="p-6">
+          {applications.filter(app => app.status === 'submitted').map((app) => (
+            <div key={app.id} className="p-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="text-xl font-bold text-gray-900">{loan.businessName}</h4>
+                  <h4 className="text-xl font-bold text-gray-900">{app.business_info?.businessName || 'N/A'}</h4>
                   <p className="text-sm text-gray-600">
-                    {formatCurrency(loan.loanAmount)} • {loan.loanPurpose} • Applied {formatDate(loan.appliedDate)}
+                    {formatCurrency(app.loan_amount || 0)} • {app.loan_purpose || 'N/A'} • Applied {formatDate(app.created_at)}
                   </p>
                   <div className="flex items-center mt-2 space-x-4">
-                    <span className={`px-2 py-1 rounded text-xs ${getRiskColor(loan.riskRating)}`}>
-                      {loan.riskRating.toUpperCase()} RISK
+                    <span className={`px-2 py-1 rounded text-xs ${getRiskColor('medium')}`}>
+                      MEDIUM RISK
                     </span>
-                    <span className="text-sm text-gray-600">Credit Score: {loan.creditScore}</span>
-                    <span className="text-sm text-gray-600">Revenue: {formatCurrency(loan.annualRevenue)}</span>
+                    <span className="text-sm text-gray-600">Revenue: {formatCurrency(app.financial_info?.annualRevenue || 0)}</span>
                   </div>
                 </div>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => handleLoanAction(loan.id, 'Approve')}
+                    onClick={() => handleLoanAction(app.id, 'Approve')}
                     className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
                   >
                     Approve
@@ -387,39 +387,33 @@ export default function AdminPortal() {
               </button>
             </div>
             {(() => {
-              const loan = mockLoans.find(l => l.id === selectedLoan)
-              if (!loan) return null
+              const app = applications.find(a => a.id === selectedLoan)
+              if (!app) return null
               return (
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <h4 className="text-xl font-bold text-gray-900 mb-3">Business Information</h4>
                       <div className="space-y-2 text-sm">
-                        <div><strong>Name:</strong> {loan.businessName}</div>
-                        <div><strong>Industry:</strong> {loan.industry}</div>
-                        <div><strong>Annual Revenue:</strong> {formatCurrency(loan.annualRevenue)}</div>
-                        <div><strong>Credit Score:</strong> {loan.creditScore}</div>
+                        <div><strong>Name:</strong> {app.business_info?.businessName || 'N/A'}</div>
+                        <div><strong>Industry:</strong> {app.business_info?.industry || 'N/A'}</div>
+                        <div><strong>Annual Revenue:</strong> {formatCurrency(app.financial_info?.annualRevenue || 0)}</div>
+                        <div><strong>Years in Business:</strong> {app.business_info?.yearsInBusiness || 'N/A'}</div>
                       </div>
                     </div>
                     <div>
                       <h4 className="text-xl font-bold text-gray-900 mb-3">Loan Details</h4>
                       <div className="space-y-2 text-sm">
-                        <div><strong>Amount:</strong> {formatCurrency(loan.loanAmount)}</div>
-                        <div><strong>Purpose:</strong> {loan.loanPurpose}</div>
-                        <div><strong>Term:</strong> {loan.loanTerm} months</div>
-                        <div><strong>Interest Rate:</strong> {loan.interestRate}%</div>
+                        <div><strong>Amount:</strong> {formatCurrency(app.loan_amount || 0)}</div>
+                        <div><strong>Purpose:</strong> {app.loan_purpose || 'N/A'}</div>
+                        <div><strong>Status:</strong> {app.status}</div>
                       </div>
                     </div>
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-gray-900 mb-3">Documents</h4>
-                    <div className="grid grid-cols-3 gap-2">
-                      {loan.documents.map(doc => (
-                        <div key={doc.id} className="flex items-center space-x-2 text-sm">
-                          <span className={`w-2 h-2 rounded-full ${doc.status === 'verified' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                          <span>{doc.name}</span>
-                        </div>
-                      ))}
+                    <div className="text-sm text-gray-600">
+                      Document verification system coming soon
                     </div>
                   </div>
                 </div>
