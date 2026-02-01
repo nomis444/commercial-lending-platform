@@ -1,0 +1,504 @@
+import { ApplicationStep } from './types'
+
+export const APPLICATION_STEPS: ApplicationStep[] = [
+  {
+    id: 'welcome',
+    title: 'Welcome',
+    description: 'Let\'s get started with your loan application. This should take about 10 minutes.',
+    fields: [
+      {
+        id: 'businessName',
+        name: 'businessName',
+        label: 'Business Name',
+        type: 'text',
+        required: true,
+        placeholder: 'Enter your business name',
+        validation: [
+          { type: 'required', message: 'Business name is required' }
+        ]
+      },
+      {
+        id: 'businessType',
+        name: 'businessType',
+        label: 'Business Type',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'llc', label: 'LLC' },
+          { value: 'corporation', label: 'Corporation' },
+          { value: 'partnership', label: 'Partnership' },
+          { value: 'sole_proprietorship', label: 'Sole Proprietorship' },
+          { value: 'other', label: 'Other' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select your business type' }
+        ]
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'business_info'
+  },
+  
+  {
+    id: 'business_info',
+    title: 'Business Information',
+    description: 'Tell us about your business operations and history.',
+    fields: [
+      {
+        id: 'yearsInBusiness',
+        name: 'yearsInBusiness',
+        label: 'Years in Business',
+        type: 'number',
+        required: true,
+        placeholder: '0',
+        validation: [
+          { type: 'required', message: 'Years in business is required' },
+          { type: 'min', value: 0, message: 'Must be 0 or greater' }
+        ]
+      },
+      {
+        id: 'industry',
+        name: 'industry',
+        label: 'Industry',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'retail', label: 'Retail' },
+          { value: 'manufacturing', label: 'Manufacturing' },
+          { value: 'technology', label: 'Technology' },
+          { value: 'healthcare', label: 'Healthcare' },
+          { value: 'construction', label: 'Construction' },
+          { value: 'professional_services', label: 'Professional Services' },
+          { value: 'food_beverage', label: 'Food & Beverage' },
+          { value: 'other', label: 'Other' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select your industry' }
+        ]
+      },
+      {
+        id: 'streetAddress',
+        name: 'streetAddress',
+        label: 'Street Address',
+        type: 'text',
+        required: true,
+        placeholder: '123 Main Street',
+        validation: [
+          { type: 'required', message: 'Street address is required' }
+        ]
+      },
+      {
+        id: 'city',
+        name: 'city',
+        label: 'City',
+        type: 'text',
+        required: true,
+        placeholder: 'New York',
+        validation: [
+          { type: 'required', message: 'City is required' }
+        ]
+      },
+      {
+        id: 'state',
+        name: 'state',
+        label: 'State',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'AL', label: 'Alabama' },
+          { value: 'AK', label: 'Alaska' },
+          { value: 'AZ', label: 'Arizona' },
+          { value: 'AR', label: 'Arkansas' },
+          { value: 'CA', label: 'California' },
+          { value: 'CO', label: 'Colorado' },
+          { value: 'CT', label: 'Connecticut' },
+          { value: 'DE', label: 'Delaware' },
+          { value: 'FL', label: 'Florida' },
+          { value: 'GA', label: 'Georgia' },
+          { value: 'HI', label: 'Hawaii' },
+          { value: 'ID', label: 'Idaho' },
+          { value: 'IL', label: 'Illinois' },
+          { value: 'IN', label: 'Indiana' },
+          { value: 'IA', label: 'Iowa' },
+          { value: 'KS', label: 'Kansas' },
+          { value: 'KY', label: 'Kentucky' },
+          { value: 'LA', label: 'Louisiana' },
+          { value: 'ME', label: 'Maine' },
+          { value: 'MD', label: 'Maryland' },
+          { value: 'MA', label: 'Massachusetts' },
+          { value: 'MI', label: 'Michigan' },
+          { value: 'MN', label: 'Minnesota' },
+          { value: 'MS', label: 'Mississippi' },
+          { value: 'MO', label: 'Missouri' },
+          { value: 'MT', label: 'Montana' },
+          { value: 'NE', label: 'Nebraska' },
+          { value: 'NV', label: 'Nevada' },
+          { value: 'NH', label: 'New Hampshire' },
+          { value: 'NJ', label: 'New Jersey' },
+          { value: 'NM', label: 'New Mexico' },
+          { value: 'NY', label: 'New York' },
+          { value: 'NC', label: 'North Carolina' },
+          { value: 'ND', label: 'North Dakota' },
+          { value: 'OH', label: 'Ohio' },
+          { value: 'OK', label: 'Oklahoma' },
+          { value: 'OR', label: 'Oregon' },
+          { value: 'PA', label: 'Pennsylvania' },
+          { value: 'RI', label: 'Rhode Island' },
+          { value: 'SC', label: 'South Carolina' },
+          { value: 'SD', label: 'South Dakota' },
+          { value: 'TN', label: 'Tennessee' },
+          { value: 'TX', label: 'Texas' },
+          { value: 'UT', label: 'Utah' },
+          { value: 'VT', label: 'Vermont' },
+          { value: 'VA', label: 'Virginia' },
+          { value: 'WA', label: 'Washington' },
+          { value: 'WV', label: 'West Virginia' },
+          { value: 'WI', label: 'Wisconsin' },
+          { value: 'WY', label: 'Wyoming' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select your state' }
+        ]
+      },
+      {
+        id: 'zipCode',
+        name: 'zipCode',
+        label: 'ZIP Code',
+        type: 'text',
+        required: true,
+        placeholder: '10001',
+        validation: [
+          { type: 'required', message: 'ZIP code is required' },
+          { type: 'pattern', value: '^[0-9]{5}(-[0-9]{4})?$', message: 'Please enter a valid ZIP code (e.g., 12345 or 12345-6789)' }
+        ]
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'contact_info'
+  },
+
+  {
+    id: 'contact_info',
+    title: 'Contact Information',
+    description: 'How can we reach you about your application?',
+    fields: [
+      {
+        id: 'contactName',
+        name: 'contactName',
+        label: 'Primary Contact Name',
+        type: 'text',
+        required: true,
+        placeholder: 'Enter the primary contact name',
+        validation: [
+          { type: 'required', message: 'Contact name is required' }
+        ]
+      },
+      {
+        id: 'contactEmail',
+        name: 'contactEmail',
+        label: 'Email Address',
+        type: 'email',
+        required: true,
+        placeholder: 'Enter email address',
+        validation: [
+          { type: 'required', message: 'Email is required' },
+          { type: 'email', message: 'Please enter a valid email address' }
+        ]
+      },
+      {
+        id: 'contactPhone',
+        name: 'contactPhone',
+        label: 'Phone Number',
+        type: 'text',
+        required: true,
+        placeholder: '(555) 123-4567',
+        validation: [
+          { type: 'required', message: 'Phone number is required' }
+        ]
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'loan_details'
+  },
+
+  {
+    id: 'loan_details',
+    title: 'Loan Requirements',
+    description: 'What are you looking to borrow and why?',
+    fields: [
+      {
+        id: 'loanAmount',
+        name: 'loanAmount',
+        label: 'Loan Amount Requested',
+        type: 'number',
+        required: true,
+        placeholder: '250000',
+        helpText: 'Enter the amount you need to borrow',
+        validation: [
+          { type: 'required', message: 'Loan amount is required' },
+          { type: 'min', value: 10000, message: 'Minimum loan amount is $10,000' },
+          { type: 'max', value: 5000000, message: 'Maximum loan amount is $5,000,000' }
+        ]
+      },
+      {
+        id: 'loanPurpose',
+        name: 'loanPurpose',
+        label: 'Purpose of Loan',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'working_capital', label: 'Working Capital' },
+          { value: 'equipment', label: 'Equipment Purchase' },
+          { value: 'expansion', label: 'Business Expansion' },
+          { value: 'inventory', label: 'Inventory' },
+          { value: 'real_estate', label: 'Real Estate' },
+          { value: 'debt_consolidation', label: 'Debt Consolidation' },
+          { value: 'other', label: 'Other' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select the purpose of your loan' }
+        ]
+      },
+      {
+        id: 'loanTerm',
+        name: 'loanTerm',
+        label: 'Preferred Loan Term (months)',
+        type: 'select',
+        required: true,
+        options: [
+          { value: '12', label: '12 months' },
+          { value: '24', label: '24 months' },
+          { value: '36', label: '36 months' },
+          { value: '48', label: '48 months' },
+          { value: '60', label: '60 months' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select your preferred loan term' }
+        ]
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'financial_info',
+    conditionalLogic: [
+      {
+        condition: { field: 'loanAmount', operator: 'greater_than', value: 500000 },
+        action: 'show_step',
+        target: 'additional_docs'
+      }
+    ]
+  },
+
+  {
+    id: 'financial_info',
+    title: 'Financial Information',
+    description: 'Help us understand your business finances.',
+    fields: [
+      {
+        id: 'annualRevenue',
+        name: 'annualRevenue',
+        label: 'Annual Revenue',
+        type: 'number',
+        required: true,
+        placeholder: '1200000',
+        helpText: 'Your business\'s total annual revenue',
+        validation: [
+          { type: 'required', message: 'Annual revenue is required' },
+          { type: 'min', value: 0, message: 'Revenue must be positive' }
+        ]
+      },
+      {
+        id: 'monthlyRevenue',
+        name: 'monthlyRevenue',
+        label: 'Average Monthly Revenue',
+        type: 'number',
+        required: true,
+        placeholder: '100000',
+        validation: [
+          { type: 'required', message: 'Monthly revenue is required' },
+          { type: 'min', value: 0, message: 'Revenue must be positive' }
+        ]
+      },
+      {
+        id: 'monthlyExpenses',
+        name: 'monthlyExpenses',
+        label: 'Average Monthly Expenses',
+        type: 'number',
+        required: true,
+        placeholder: '75000',
+        validation: [
+          { type: 'required', message: 'Monthly expenses is required' },
+          { type: 'min', value: 0, message: 'Expenses must be positive' }
+        ]
+      },
+      {
+        id: 'existingDebt',
+        name: 'existingDebt',
+        label: 'Existing Business Debt',
+        type: 'number',
+        required: false,
+        placeholder: '150000',
+        helpText: 'Total amount of existing business loans and credit lines'
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'banking_info'
+  },
+
+  {
+    id: 'banking_info',
+    title: 'Banking Information',
+    description: 'Tell us about your business banking relationship.',
+    fields: [
+      {
+        id: 'bankName',
+        name: 'bankName',
+        label: 'Primary Bank',
+        type: 'text',
+        required: true,
+        placeholder: 'Bank of America',
+        validation: [
+          { type: 'required', message: 'Bank name is required' }
+        ]
+      },
+      {
+        id: 'accountType',
+        name: 'accountType',
+        label: 'Account Type',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'checking', label: 'Business Checking' },
+          { value: 'savings', label: 'Business Savings' },
+          { value: 'both', label: 'Both Checking and Savings' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select your account type' }
+        ]
+      },
+      {
+        id: 'averageBalance',
+        name: 'averageBalance',
+        label: 'Average Account Balance',
+        type: 'number',
+        required: true,
+        placeholder: '50000',
+        helpText: 'Average balance over the last 3 months',
+        validation: [
+          { type: 'required', message: 'Average balance is required' },
+          { type: 'min', value: 0, message: 'Balance must be positive' }
+        ]
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'documents'
+  },
+
+  {
+    id: 'documents',
+    title: 'Document Upload',
+    description: 'Upload the required documents to complete your application.',
+    fields: [
+      {
+        id: 'bankStatements',
+        name: 'bankStatements',
+        label: 'Bank Statements (Last 3 months)',
+        type: 'file',
+        required: true,
+        helpText: 'Upload your last 3 months of business bank statements',
+        validation: [
+          { type: 'required', message: 'Bank statements are required' }
+        ]
+      },
+      {
+        id: 'taxReturns',
+        name: 'taxReturns',
+        label: 'Business Tax Returns (Last 2 years)',
+        type: 'file',
+        required: true,
+        helpText: 'Upload your last 2 years of business tax returns',
+        validation: [
+          { type: 'required', message: 'Tax returns are required' }
+        ]
+      },
+      {
+        id: 'financialStatements',
+        name: 'financialStatements',
+        label: 'Financial Statements',
+        type: 'file',
+        required: false,
+        helpText: 'Profit & Loss, Balance Sheet (if available)'
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'review'
+  },
+
+  {
+    id: 'review',
+    title: 'Review & Submit',
+    description: 'Please review your application before submitting.',
+    fields: [
+      {
+        id: 'terms',
+        name: 'terms',
+        label: 'I agree to the terms and conditions',
+        type: 'checkbox',
+        required: true,
+        validation: [
+          { type: 'required', message: 'You must agree to the terms and conditions' }
+        ]
+      },
+      {
+        id: 'consent',
+        name: 'consent',
+        label: 'I consent to credit and background checks',
+        type: 'checkbox',
+        required: true,
+        validation: [
+          { type: 'required', message: 'Consent for credit checks is required' }
+        ]
+      }
+    ],
+    isRequired: true
+  }
+]
+
+export function getStepById(stepId: string): ApplicationStep | undefined {
+  return APPLICATION_STEPS.find(step => step.id === stepId)
+}
+
+export function getNextStep(currentStepId: string, formData: Record<string, any>): string | null {
+  const currentStep = getStepById(currentStepId)
+  if (!currentStep) return null
+
+  // Check conditional logic
+  if (currentStep.conditionalLogic) {
+    for (const logic of currentStep.conditionalLogic) {
+      const fieldValue = formData[logic.condition.field]
+      const conditionMet = evaluateCondition(fieldValue, logic.condition.operator, logic.condition.value)
+      
+      if (conditionMet && logic.action === 'show_step') {
+        return logic.target
+      }
+    }
+  }
+
+  return currentStep.nextStepId || null
+}
+
+function evaluateCondition(fieldValue: any, operator: string, conditionValue: any): boolean {
+  switch (operator) {
+    case 'equals':
+      return fieldValue === conditionValue
+    case 'not_equals':
+      return fieldValue !== conditionValue
+    case 'greater_than':
+      return Number(fieldValue) > Number(conditionValue)
+    case 'less_than':
+      return Number(fieldValue) < Number(conditionValue)
+    case 'contains':
+      return String(fieldValue).toLowerCase().includes(String(conditionValue).toLowerCase())
+    default:
+      return false
+  }
+}
