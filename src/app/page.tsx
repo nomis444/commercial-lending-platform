@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function Home() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -11,15 +13,18 @@ export default function Home() {
           Experience the future of commercial lending with real-time tracking and streamlined processes.
         </p>
         <div className="space-x-4">
-          <a 
+          <Link 
             href="/apply"
             className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-lg text-lg inline-block"
           >
             Apply for a Loan
-          </a>
-          <button className="border border-primary-600 text-primary-600 hover:bg-primary-50 font-bold py-3 px-8 rounded-lg text-lg">
+          </Link>
+          <Link 
+            href="/signup"
+            className="border border-primary-600 text-primary-600 hover:bg-primary-50 font-bold py-3 px-8 rounded-lg text-lg inline-block"
+          >
             Become an Investor
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -92,12 +97,12 @@ export default function Home() {
         <p className="text-xl mb-6 opacity-90">
           Join thousands of borrowers and investors who trust our platform
         </p>
-        <a 
+        <Link 
           href="/apply"
           className="bg-white text-primary-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg inline-block"
         >
           Start Your Application
-        </a>
+        </Link>
       </div>
     </div>
   )
