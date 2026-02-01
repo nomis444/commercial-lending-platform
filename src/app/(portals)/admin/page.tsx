@@ -238,13 +238,13 @@ export default function AdminPortal() {
                     Approve
                   </button>
                   <button
-                    onClick={() => handleLoanAction(loan.id, 'Request More Info')}
+                    onClick={() => handleLoanAction(app.id, 'Request More Info')}
                     className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm"
                   >
                     More Info
                   </button>
                   <button
-                    onClick={() => handleLoanAction(loan.id, 'Reject')}
+                    onClick={() => handleLoanAction(app.id, 'Reject')}
                     className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
                   >
                     Reject
