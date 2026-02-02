@@ -182,11 +182,11 @@ export class ApplicationEngine {
             averageBalance: session.formData.averageBalance
           },
           contact_info: {
-            firstName: session.formData.firstName,
-            lastName: session.formData.lastName,
-            email: session.formData.email,
-            phone: session.formData.phone,
-            title: session.formData.title
+            firstName: session.formData.firstName || '',
+            lastName: session.formData.lastName || '',
+            email: session.formData.email || session.formData.accountEmail || '',
+            phone: session.formData.phone || '',
+            title: session.formData.title || ''
           },
           step_data: session.formData,
           current_step: 'review'
