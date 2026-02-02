@@ -250,19 +250,56 @@ export default function Home() {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="bg-primary-600 rounded-lg p-8 text-center text-white">
-        <h2 className="text-3xl font-bold mb-4">
-          Ready to Get Started?
+      {/* Investor CTA Section */}
+      <div className="bg-primary-600 rounded-lg p-12 text-center text-white">
+        <h2 className="text-4xl font-bold mb-4">
+          Become an Investor
         </h2>
-        <p className="text-xl mb-6 opacity-90">
-          Join thousands of borrowers and investors who trust our platform
+        <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+          Join our platform and start earning competitive returns by funding vetted commercial loans
         </p>
+        
+        <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-4xl mx-auto">
+          <div className="bg-white bg-opacity-10 rounded-lg p-6">
+            <div className="text-3xl font-bold mb-2">8-12%</div>
+            <div className="text-sm opacity-90">Target Annual Returns</div>
+          </div>
+          <div className="bg-white bg-opacity-10 rounded-lg p-6">
+            <div className="text-3xl font-bold mb-2">100%</div>
+            <div className="text-sm opacity-90">Transparent Process</div>
+          </div>
+          <div className="bg-white bg-opacity-10 rounded-lg p-6">
+            <div className="text-3xl font-bold mb-2">24/7</div>
+            <div className="text-sm opacity-90">Portfolio Monitoring</div>
+          </div>
+        </div>
+
+        <div className="space-y-3 mb-8 max-w-2xl mx-auto text-left">
+          <div className="flex items-start">
+            <svg className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Access pre-vetted commercial loan opportunities with detailed business financials</span>
+          </div>
+          <div className="flex items-start">
+            <svg className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Diversify your portfolio across multiple loans to minimize risk</span>
+          </div>
+          <div className="flex items-start">
+            <svg className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Real-time tracking of your investments with automated monthly payments</span>
+          </div>
+        </div>
+
         <Link 
-          href="/apply"
-          className="bg-white text-primary-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg inline-block"
+          href="/signup"
+          className="bg-white text-primary-600 hover:bg-gray-100 font-bold py-4 px-10 rounded-lg text-xl inline-block shadow-lg"
         >
-          Start Your Application
+          Start Investing Today
         </Link>
       </div>
     </div>
