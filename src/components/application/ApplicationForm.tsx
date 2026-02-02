@@ -80,7 +80,7 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
     setIsLoading(true)
 
     // Validate current step
-    const validation = applicationEngine.validateStepData(currentStep.id, formData)
+    const validation = applicationEngine.validateStepData(currentStep.id, formData, session.id)
     
     if (!validation.isValid) {
       setErrors(validation.errors)
@@ -136,7 +136,7 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
     
     try {
       // First validate and save the current step data (review step)
-      const validation = applicationEngine.validateStepData(currentStep.id, formData)
+      const validation = applicationEngine.validateStepData(currentStep.id, formData, session.id)
       
       if (!validation.isValid) {
         setErrors(validation.errors)

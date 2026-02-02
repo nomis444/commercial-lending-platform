@@ -239,8 +239,23 @@ export class ApplicationEngine {
   }
 
   // Validate step data
-  validateStepData(stepId: string, data: Record<string, any>): { isValid: boolean; errors: Record<string, string> } {
-    const step = getStepById(stepId)
+  validateStepData(stepId: string, data: Record<string, any>, sessionId?: string): { isValid: boolean; errors: Record<string, string> } {
+    let step: ApplicationStep | undefined
+    
+    // Handle dynamic loan_details step
+    if (stepId === 'loan_details' && sessionId) {
+      const session = this.getSession(sessionId)
+      if (session) {
+        const { getLoanDetailsStep } = require('./steps')
+        const productType = session.formData.productType as LoanProductType
+        step = getLoanDetailsStep(productType)
+      } else {
+        step = getStepById(stepId)
+      }
+    } else {
+      step = getStepById(stepId)
+    }
+    
     if (!step) return { isValid: false, errors: { general: 'Invalid step' } }
 
     const errors: Record<string, string> = {}
