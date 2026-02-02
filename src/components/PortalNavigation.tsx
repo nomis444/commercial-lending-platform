@@ -2,28 +2,50 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { demoAuth } from '@/lib/demo/auth'
+import { useAuth } from '@/lib/auth/hooks'
 import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function PortalNavigation() {
   const pathname = usePathname()
   const router = useRouter()
-  const [user, setUser] = useState(demoAuth.getCurrentUser())
+  const { user } = useAuth()
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
-    setUser(demoAuth.getCurrentUser())
-  }, [pathname])
+    if (user) {
+      // Get user role from metadata
+      const role = user.user_metadata?.role || 'borrower'
+      setUserRole(role)
+    }
+  }, [user])
 
   const handleLogout = async () => {
-    await demoAuth.signOut()
+    const supabase = createClient()
+    await supabase.auth.signOut()
     router.push('/')
   }
 
-  const portals = [
-    { name: 'Customer Portal', href: '/customer', icon: '👤' },
-    { name: 'Investor Portal', href: '/investor', icon: '💼' },
-    { name: 'Admin Portal', href: '/admin', icon: '⚙️' },
-  ]
+  // Define portals based on user role
+  const getPortals = () => {
+    const portals = []
+    
+    if (userRole === 'borrower' || userRole === 'admin') {
+      portals.push({ name: 'Customer Portal', href: '/customer', icon: '👤', role: 'borrower' })
+    }
+    
+    if (userRole === 'investor' || userRole === 'admin') {
+      portals.push({ name: 'Investor Portal', href: '/investor', icon: '💼', role: 'investor' })
+    }
+    
+    if (userRole === 'admin') {
+      portals.push({ name: 'Admin Portal', href: '/admin', icon: '⚙️', role: 'admin' })
+    }
+    
+    return portals
+  }
+
+  const portals = getPortals()
 
   return (
     <div className="bg-white border-b border-gray-200">
@@ -60,7 +82,7 @@ export default function PortalNavigation() {
             {user ? (
               <div className="flex items-center space-x-3">
                 <span className="text-sm text-gray-600">
-                  Welcome, {user.name} ({user.role})
+                  Welcome, {user.user_metadata?.full_name || user.email} ({userRole})
                 </span>
                 <button
                   onClick={handleLogout}

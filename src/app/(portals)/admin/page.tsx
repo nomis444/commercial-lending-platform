@@ -2,14 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { demoAuth } from '@/lib/demo/auth'
-import { createClient } from '@supabase/supabase-js'
-import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/mock/data'
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spznjpzxpssxvgcksgxh.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwem5qcHp4cHNzeHZnY2tzZ3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NjAwMDYsImV4cCI6MjA4NTUzNjAwNn0.O07nASkFwl-xST_Ujz5MuJTuGIZzxJSH0PzHtumbxu4'
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+import { useAuth } from '@/lib/auth/hooks'
+import { createClient } from '@/lib/supabase/client'
+import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/utils/formatting'
 
 interface Application {
   id: string
@@ -27,16 +22,25 @@ export default function AdminPortal() {
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
+  const supabase = createClient()
 
   useEffect(() => {
-    const user = demoAuth.getCurrentUser()
-    if (!user || user.role !== 'admin') {
-      router.push('/login')
-      return
-    }
+    if (!authLoading) {
+      if (!user) {
+        router.push('/login')
+        return
+      }
+      
+      const userRole = user.user_metadata?.role
+      if (userRole !== 'admin') {
+        router.push('/customer')
+        return
+      }
 
-    fetchApplications()
-  }, [router])
+      fetchApplications()
+    }
+  }, [user, authLoading, router])
 
   const fetchApplications = async () => {
     try {

@@ -17,26 +17,8 @@ export default function PublicHeader() {
     }
   }
 
-  const getUserRole = () => {
-    return user?.user_metadata?.role || 'borrower'
-  }
-
   const getUserName = () => {
     return user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
-  }
-
-  const getDashboardLink = () => {
-    const role = getUserRole()
-    switch (role) {
-      case 'borrower':
-        return '/customer'
-      case 'investor':
-        return '/investor'
-      case 'admin':
-        return '/admin'
-      default:
-        return '/customer'
-    }
   }
 
   return (
@@ -63,14 +45,8 @@ export default function PublicHeader() {
                 {user ? (
                   <div className="flex items-center space-x-4">
                     <span className="text-sm text-gray-600">
-                      Welcome, {getUserName()}
+                      {getUserName()}
                     </span>
-                    <a 
-                      href={getDashboardLink()} 
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
-                    >
-                      Dashboard
-                    </a>
                     <button
                       onClick={handleSignOut}
                       className="text-gray-500 hover:text-gray-900"

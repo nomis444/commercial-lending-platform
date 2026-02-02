@@ -14,7 +14,7 @@ export function createClient() {
 }
 
 // Mock Supabase client for development when env vars aren't set
-function createMockSupabaseClient() {
+function createMockSupabaseClient(): any {
   return {
     auth: {
       signUp: async () => ({ data: null, error: new Error('Demo mode - Supabase not configured') }),
@@ -32,7 +32,14 @@ function createMockSupabaseClient() {
     },
     from: () => ({
       insert: () => ({ select: () => ({ single: async () => ({ data: null, error: new Error('Demo mode - Supabase not configured') }) }) }),
-      select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
+      select: () => ({
+        eq: () => ({
+          single: async () => ({ data: null, error: null }),
+          order: () => ({ limit: async () => ({ data: [], error: null }) })
+        }),
+        in: () => ({ order: async () => ({ data: [], error: null }) }),
+        order: async () => ({ data: [], error: null })
+      }),
       delete: () => ({ eq: async () => ({ error: null }) })
     })
   }

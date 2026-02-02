@@ -12,7 +12,7 @@ export default function SignUpPage() {
     confirmPassword: '',
     name: '',
     company: '',
-    role: 'borrower' as 'borrower' | 'investor'
+    role: 'borrower' as 'borrower' | 'investor' | 'admin'
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -58,6 +58,9 @@ export default function SignUpPage() {
             break
           case 'investor':
             router.push('/investor')
+            break
+          case 'admin':
+            router.push('/admin')
             break
           default:
             router.push('/')
@@ -115,6 +118,7 @@ export default function SignUpPage() {
               >
                 <option value="borrower">Borrower (seeking loans)</option>
                 <option value="investor">Investor (providing funding)</option>
+                <option value="admin">Administrator (platform management)</option>
               </select>
             </div>
 

@@ -79,12 +79,15 @@ If you want to add real database functionality later:
 
 1. Create a Supabase project at [supabase.com](https://supabase.com)
 2. Run the migrations in the `supabase/migrations/` folder
-3. Add environment variables:
+3. Add environment variables in Vercel:
    ```
    NEXT_PUBLIC_SUPABASE_URL=your_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   NEXT_PUBLIC_SITE_URL=https://www.midpointaccess.com
    ```
-4. Redeploy on Vercel
+4. Configure Supabase URL settings (see SUPABASE_EMAIL_SETUP.md)
+5. Redeploy on Vercel
 
 ### Troubleshooting
 

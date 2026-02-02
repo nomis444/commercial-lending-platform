@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/hooks'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { formatCurrency, formatDate, getStatusColor } from '@/lib/mock/data'
+import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils/formatting'
 
 // Initialize Supabase client directly
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spznjpzxpssxvgcksgxh.supabase.co'

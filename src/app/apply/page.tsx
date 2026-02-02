@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ApplicationForm from '@/components/application/ApplicationForm'
 import { ApplicationSession } from '@/lib/application/types'
-import { demoAuth } from '@/lib/demo/auth'
+import { useAuth } from '@/lib/auth/hooks'
 import { getLoanProduct } from '@/lib/application/products'
 
 function ApplyPageContent() {
@@ -13,6 +13,7 @@ function ApplyPageContent() {
   const [productType, setProductType] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user } = useAuth()
 
   useEffect(() => {
     // Get product type from URL parameter
@@ -27,12 +28,22 @@ function ApplyPageContent() {
 
   const handleViewDashboard = () => {
     // Check if user is logged in
-    const user = demoAuth.getCurrentUser()
     if (!user) {
       // Redirect to login with a message
       router.push('/login?message=Please log in to view your dashboard')
     } else {
-      router.push('/customer')
+      // Redirect based on user role
+      const userRole = user.user_metadata?.role || 'borrower'
+      switch (userRole) {
+        case 'investor':
+          router.push('/investor')
+          break
+        case 'admin':
+          router.push('/admin')
+          break
+        default:
+          router.push('/customer')
+      }
     }
   }
 

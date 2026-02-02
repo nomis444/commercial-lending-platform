@@ -170,6 +170,7 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
           }
 
           // Create the user account
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
           const { data: authData, error: signUpError } = await supabase.auth.signUp({
             email: formData.accountEmail,
             password: formData.accountPassword,
@@ -181,7 +182,7 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
                 company_name: formData.businessName,
                 role: 'borrower',
               },
-              emailRedirectTo: `${window.location.origin}/customer`,
+              emailRedirectTo: `${siteUrl}/auth/callback`,
             },
           })
 
