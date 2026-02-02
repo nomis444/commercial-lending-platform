@@ -196,7 +196,8 @@ export class ApplicationEngine {
 
       if (appError) {
         console.error('Error saving application:', appError)
-        throw new Error('Failed to save application')
+        console.error('Error details:', JSON.stringify(appError, null, 2))
+        throw new Error(`Failed to save application: ${appError.message || 'Unknown error'}`)
       }
 
       // Update session status
