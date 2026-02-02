@@ -1,17 +1,14 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/hooks'
 
 export default function PublicHeader() {
   const { user, loading, signOut } = useAuth()
-  const router = useRouter()
 
   const handleSignOut = async () => {
     try {
       await signOut()
-      router.push('/')
-      router.refresh()
+      window.location.href = '/'
     } catch (error) {
       console.error('Sign out error:', error)
     }
