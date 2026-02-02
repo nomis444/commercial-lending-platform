@@ -183,6 +183,7 @@ export class ApplicationEngine {
           loan_purpose: session.formData.loanPurpose,
           business_info: {
             businessName: session.formData.businessName,
+            taxId: session.formData.taxId,
             businessType: session.formData.businessType,
             yearsInBusiness: session.formData.yearsInBusiness,
             industry: session.formData.industry,

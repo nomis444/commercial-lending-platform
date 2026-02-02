@@ -89,6 +89,19 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
         ]
       },
       {
+        id: 'taxId',
+        name: 'taxId',
+        label: 'Tax ID / EIN',
+        type: 'text',
+        required: true,
+        placeholder: 'XX-XXXXXXX',
+        helpText: 'Enter your Federal Employer Identification Number (EIN)',
+        validation: [
+          { type: 'required', message: 'Tax ID is required' },
+          { type: 'pattern', value: '^[0-9]{2}-?[0-9]{7}$', message: 'Please enter a valid Tax ID (XX-XXXXXXX)' }
+        ]
+      },
+      {
         id: 'businessType',
         name: 'businessType',
         label: 'Business Type',

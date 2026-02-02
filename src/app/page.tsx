@@ -12,16 +12,10 @@ export default function Home() {
           Connect borrowers with investors through our transparent, easy-to-use platform. 
           Experience the future of commercial lending with real-time tracking and streamlined processes.
         </p>
-        <div className="space-x-4">
-          <Link 
-            href="/apply"
-            className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-lg text-lg inline-block"
-          >
-            Apply for a Loan
-          </Link>
+        <div>
           <Link 
             href="/signup"
-            className="border border-primary-600 text-primary-600 hover:bg-primary-50 font-bold py-3 px-8 rounded-lg text-lg inline-block"
+            className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-lg text-lg inline-block"
           >
             Become an Investor
           </Link>

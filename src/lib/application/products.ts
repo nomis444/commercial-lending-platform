@@ -21,7 +21,7 @@ export const LOAN_PRODUCTS: Record<LoanProductType, LoanProduct> = {
     maxAmount: 8000,
     baseRate: 0.25, // 25% APR
     termOptions: [12, 24],
-    requiredSteps: ['welcome', 'business_info', 'banking_info', 'review'],
+    requiredSteps: ['welcome', 'business_info', 'loan_details', 'banking_info', 'review'],
     features: [
       'Instant approval decision',
       'Minimal documentation',
