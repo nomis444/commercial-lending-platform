@@ -135,7 +135,7 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
     setIsLoading(true)
     
     try {
-      // First validate and save the current step data (review step)
+      // Validate current step
       const validation = applicationEngine.validateStepData(currentStep.id, formData, session.id)
       
       if (!validation.isValid) {
@@ -144,17 +144,95 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
         return
       }
 
-      // Save the review step data
-      applicationEngine.saveStepData(session.id, formData)
+      // If this is the create_account step, handle authentication
+      if (currentStep.id === 'create_account') {
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spznjpzxpssxvgcksgxh.supabase.co'
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwem5qcHp4cHNzeHZnY2tzZ3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NjAwMDYsImV4cCI6MjA4NTUzNjAwNn0.O07nASkFwl-xST_Ujz5MuJTuGIZzxJSH0PzHtumbxu4'
+        const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-      // Now submit the application (this is now async)
-      const submittedSession = await applicationEngine.submitApplication(session.id)
-      if (submittedSession && onComplete) {
-        onComplete(submittedSession)
+        const accountMode = formData.accountMode || 'create'
+        let userId: string | undefined
+
+        if (accountMode === 'create') {
+          // Validate password confirmation for new accounts
+          if (formData.accountPassword !== formData.accountPasswordConfirm) {
+            setErrors({ accountPasswordConfirm: 'Passwords do not match' })
+            setIsLoading(false)
+            return
+          }
+
+          // Validate password length
+          if (formData.accountPassword.length < 8) {
+            setErrors({ accountPassword: 'Password must be at least 8 characters' })
+            setIsLoading(false)
+            return
+          }
+
+          // Create the user account
+          const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            email: formData.accountEmail,
+            password: formData.accountPassword,
+            options: {
+              data: {
+                full_name: formData.firstName && formData.lastName 
+                  ? `${formData.firstName} ${formData.lastName}` 
+                  : formData.businessName,
+                company_name: formData.businessName,
+                role: 'borrower',
+              },
+            },
+          })
+
+          if (signUpError) {
+            setErrors({ accountEmail: signUpError.message })
+            setIsLoading(false)
+            return
+          }
+
+          if (!authData.user) {
+            setErrors({ accountEmail: 'Failed to create account' })
+            setIsLoading(false)
+            return
+          }
+
+          userId = authData.user.id
+        } else {
+          // Sign in to existing account
+          const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: formData.accountEmail,
+            password: formData.accountPassword,
+          })
+
+          if (signInError) {
+            setErrors({ accountPassword: 'Invalid email or password' })
+            setIsLoading(false)
+            return
+          }
+
+          if (!authData.user) {
+            setErrors({ accountEmail: 'Failed to sign in' })
+            setIsLoading(false)
+            return
+          }
+
+          userId = authData.user.id
+        }
+
+        // Save the account step data
+        applicationEngine.saveStepData(session.id, formData)
+
+        // Now submit the application with the user's ID
+        const submittedSession = await applicationEngine.submitApplication(session.id, userId)
+        
+        if (submittedSession && onComplete) {
+          onComplete(submittedSession)
+        }
       }
     } catch (error) {
       console.error('Submission error:', error)
-      alert('Error submitting application. Please try again. (Updated)')
+      const errorMessage = error instanceof Error ? error.message : 'Error submitting application. Please try again.'
+      alert(errorMessage)
     }
     
     setIsLoading(false)
@@ -169,7 +247,8 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
   }
 
   const progress = applicationEngine.getProgress(session.id)
-  const isLastStep = currentStep.id === 'review'
+  const isLastStep = currentStep.id === 'create_account'
+  const isReviewStep = currentStep.id === 'review'
   const canGoBack = session.completedSteps.length > 0
 
   return (
@@ -255,15 +334,41 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
 
           {/* Form Fields */}
           <div className="space-y-6">
-            {currentStep.fields.map((field) => (
-              <FormFieldComponent
-                key={field.id}
-                field={field}
-                value={formData[field.name] || ''}
-                onChange={(value) => handleFieldChange(field.name, value)}
-                error={errors[field.name]}
-              />
-            ))}
+            {/* Special message for create_account step */}
+            {currentStep.id === 'create_account' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex">
+                  <svg className="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-blue-800">
+                      {formData.accountMode === 'create' 
+                        ? 'Create an account to track your application status and manage your loan once approved.'
+                        : 'Sign in to your existing account to link this application to your profile.'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {currentStep.fields.map((field) => {
+              // Hide password confirmation field if user is signing in
+              if (field.id === 'accountPasswordConfirm' && formData.accountMode === 'signin') {
+                return null
+              }
+              
+              return (
+                <FormFieldComponent
+                  key={field.id}
+                  field={field}
+                  value={formData[field.name] || ''}
+                  onChange={(value) => handleFieldChange(field.name, value)}
+                  error={errors[field.name]}
+                />
+              )
+            })}
           </div>
 
           {/* Payment Calculator for Loan Details Step */}
@@ -275,8 +380,8 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
             />
           )}
 
-          {/* Review Section for Last Step */}
-          {isLastStep && (
+          {/* Review Section for Review Step */}
+          {isReviewStep && (
             <div className="mt-8 p-6 bg-gray-50 rounded-lg">
               <h3 className="text-lg font-semibold mb-4">Application Summary</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

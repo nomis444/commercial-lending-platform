@@ -12,7 +12,7 @@ export interface FormField {
   id: string
   name: string
   label: string
-  type: 'text' | 'email' | 'number' | 'select' | 'textarea' | 'file' | 'checkbox' | 'radio'
+  type: 'text' | 'email' | 'number' | 'select' | 'textarea' | 'file' | 'checkbox' | 'radio' | 'password'
   required: boolean
   placeholder?: string
   options?: { value: string; label: string }[]

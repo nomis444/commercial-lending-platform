@@ -140,44 +140,24 @@ export class ApplicationEngine {
   }
 
   // Submit application
-  async submitApplication(sessionId: string): Promise<ApplicationSession | null> {
+  async submitApplication(sessionId: string, userId?: string): Promise<ApplicationSession | null> {
     const session = this.getSession(sessionId)
     if (!session) return null
 
     try {
-      // Create a default tenant for demo purposes
-      const { data: tenant, error: tenantError } = await supabase
-        .from('tenants')
-        .select('id')
-        .eq('name', 'Demo Tenant')
-        .single()
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser()
+      const actualUserId = userId || user?.id
 
-      let tenantId = tenant?.id
-
-      if (!tenant) {
-        // Create demo tenant if it doesn't exist
-        const { data: newTenant, error: createTenantError } = await supabase
-          .from('tenants')
-          .insert({
-            name: 'Demo Tenant',
-            type: 'borrower'
-          })
-          .select('id')
-          .single()
-
-        if (createTenantError) {
-          console.error('Error creating tenant:', createTenantError)
-          throw new Error('Failed to create tenant')
-        }
-
-        tenantId = newTenant.id
+      if (!actualUserId) {
+        throw new Error('User must be logged in to submit application')
       }
 
-      // Save application to Supabase
+      // Save application to Supabase with user_id
       const { data: application, error: appError } = await supabase
         .from('applications')
         .insert({
-          tenant_id: tenantId,
+          user_id: actualUserId,
           status: 'submitted',
           loan_amount: session.formData.loanAmount,
           loan_purpose: session.formData.loanPurpose,
@@ -200,6 +180,13 @@ export class ApplicationEngine {
             bankName: session.formData.bankName,
             accountType: session.formData.accountType,
             averageBalance: session.formData.averageBalance
+          },
+          contact_info: {
+            firstName: session.formData.firstName,
+            lastName: session.formData.lastName,
+            email: session.formData.email,
+            phone: session.formData.phone,
+            title: session.formData.title
           },
           step_data: session.formData,
           current_step: 'review'

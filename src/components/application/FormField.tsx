@@ -17,6 +17,7 @@ export default function FormFieldComponent({ field, value, onChange, error }: Fo
     switch (field.type) {
       case 'text':
       case 'email':
+      case 'password':
         return (
           <input
             type={field.type}

@@ -332,6 +332,51 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
           { type: 'required', message: 'ZIP code is required' },
           { type: 'pattern', value: '^[0-9]{5}(-[0-9]{4})?$', message: 'Please enter a valid ZIP code (e.g., 12345 or 12345-6789)' }
         ]
+      },
+      {
+        id: 'firstName',
+        name: 'firstName',
+        label: 'First Name',
+        type: 'text',
+        required: true,
+        placeholder: 'John',
+        validation: [
+          { type: 'required', message: 'First name is required' }
+        ]
+      },
+      {
+        id: 'lastName',
+        name: 'lastName',
+        label: 'Last Name',
+        type: 'text',
+        required: true,
+        placeholder: 'Smith',
+        validation: [
+          { type: 'required', message: 'Last name is required' }
+        ]
+      },
+      {
+        id: 'email',
+        name: 'email',
+        label: 'Email Address',
+        type: 'email',
+        required: true,
+        placeholder: 'john.smith@company.com',
+        validation: [
+          { type: 'required', message: 'Email is required' },
+          { type: 'email', message: 'Please enter a valid email address' }
+        ]
+      },
+      {
+        id: 'phone',
+        name: 'phone',
+        label: 'Phone Number',
+        type: 'text',
+        required: true,
+        placeholder: '(555) 123-4567',
+        validation: [
+          { type: 'required', message: 'Phone number is required' }
+        ]
       }
     ],
     isRequired: true,
@@ -618,6 +663,64 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
         validation: [
           { type: 'required', message: 'Consent for credit checks is required' }
         ]
+      }
+    ],
+    isRequired: true,
+    nextStepId: 'create_account'
+  },
+
+  {
+    id: 'create_account',
+    title: 'Sign In or Create Account',
+    description: 'Sign in to your existing account or create a new one to track your application.',
+    fields: [
+      {
+        id: 'accountMode',
+        name: 'accountMode',
+        label: 'Account Option',
+        type: 'radio',
+        required: true,
+        options: [
+          { value: 'create', label: 'Create a new account' },
+          { value: 'signin', label: 'Sign in to existing account' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select an option' }
+        ]
+      },
+      {
+        id: 'accountEmail',
+        name: 'accountEmail',
+        label: 'Email Address',
+        type: 'email',
+        required: true,
+        placeholder: 'your.email@company.com',
+        helpText: 'We\'ll use this to send you updates about your application',
+        validation: [
+          { type: 'required', message: 'Email is required' },
+          { type: 'email', message: 'Please enter a valid email address' }
+        ]
+      },
+      {
+        id: 'accountPassword',
+        name: 'accountPassword',
+        label: 'Password',
+        type: 'password',
+        required: true,
+        placeholder: 'Enter your password',
+        helpText: 'For new accounts: Must be at least 8 characters',
+        validation: [
+          { type: 'required', message: 'Password is required' }
+        ]
+      },
+      {
+        id: 'accountPasswordConfirm',
+        name: 'accountPasswordConfirm',
+        label: 'Confirm Password',
+        type: 'password',
+        required: false,
+        placeholder: 'Re-enter your password',
+        helpText: 'Only required for new accounts'
       }
     ],
     isRequired: true

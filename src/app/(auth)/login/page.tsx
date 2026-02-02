@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { demoAuth } from '@/lib/demo/auth'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -18,55 +19,40 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const user = await demoAuth.signIn(email, password)
-      
-      // Redirect based on user role
-      switch (user.role) {
-        case 'borrower':
-          router.push('/customer')
-          break
-        case 'investor':
-          router.push('/investor')
-          break
-        case 'admin':
-          router.push('/admin')
-          break
-        default:
-          router.push('/')
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        setError(signInError.message)
+        return
+      }
+
+      if (data.user) {
+        // Get user role from metadata
+        const role = data.user.user_metadata?.role || 'borrower'
+        
+        // Redirect based on role
+        switch (role) {
+          case 'borrower':
+            router.push('/customer')
+            break
+          case 'investor':
+            router.push('/investor')
+            break
+          case 'admin':
+            router.push('/admin')
+            break
+          default:
+            router.push('/')
+        }
+        router.refresh()
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const handleDemoLogin = async (role: 'borrower' | 'investor' | 'admin') => {
-    const demoEmails = {
-      borrower: 'borrower@demo.com',
-      investor: 'investor@demo.com',
-      admin: 'admin@demo.com'
-    }
-    
-    setEmail(demoEmails[role])
-    setPassword('demo123')
-    
-    try {
-      const user = await demoAuth.signIn(demoEmails[role], 'demo123')
-      
-      switch (user.role) {
-        case 'borrower':
-          router.push('/customer')
-          break
-        case 'investor':
-          router.push('/investor')
-          break
-        case 'admin':
-          router.push('/admin')
-          break
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Demo login failed')
     }
   }
 
@@ -83,31 +69,6 @@ export default function LoginPage() {
               create a new account
             </Link>
           </p>
-        </div>
-
-        {/* Demo Login Buttons */}
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-3">Demo Accounts (For Presentation)</h3>
-          <div className="space-y-2">
-            <button
-              onClick={() => handleDemoLogin('borrower')}
-              className="w-full text-left px-3 py-2 text-sm bg-white border border-blue-200 rounded hover:bg-blue-50"
-            >
-              <strong>Borrower:</strong> borrower@demo.com
-            </button>
-            <button
-              onClick={() => handleDemoLogin('investor')}
-              className="w-full text-left px-3 py-2 text-sm bg-white border border-blue-200 rounded hover:bg-blue-50"
-            >
-              <strong>Investor:</strong> investor@demo.com
-            </button>
-            <button
-              onClick={() => handleDemoLogin('admin')}
-              className="w-full text-left px-3 py-2 text-sm bg-white border border-blue-200 rounded hover:bg-blue-50"
-            >
-              <strong>Admin:</strong> admin@demo.com
-            </button>
-          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

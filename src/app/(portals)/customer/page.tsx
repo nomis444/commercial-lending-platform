@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { demoAuth } from '@/lib/demo/auth'
-import { createClient } from '@supabase/supabase-js'
+import { useAuth } from '@/lib/auth/hooks'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/mock/data'
 
-// Initialize Supabase client
+// Initialize Supabase client directly
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spznjpzxpssxvgcksgxh.supabase.co'
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwem5qcHp4cHNzeHZnY2tzZ3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NjAwMDYsImV4cCI6MjA4NTUzNjAwNn0.O07nASkFwl-xST_Ujz5MuJTuGIZzxJSH0PzHtumbxu4'
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
 
 interface Application {
   id: string
+  user_id: string
   status: string
   loan_amount: number
   loan_purpose: string
@@ -26,27 +27,34 @@ export default function CustomerPortal() {
   const [activeTab, setActiveTab] = useState('overview')
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
+  const { user, loading: authLoading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    const user = demoAuth.getCurrentUser()
-    if (!user || user.role !== 'borrower') {
+    if (!authLoading && !user) {
       router.push('/login')
       return
     }
 
-    fetchUserApplications()
-  }, [router])
+    if (user) {
+      const role = user.user_metadata?.role || 'borrower'
+      if (role !== 'borrower') {
+        router.push('/login')
+        return
+      }
+      fetchUserApplications()
+    }
+  }, [user, authLoading, router])
 
   const fetchUserApplications = async () => {
+    if (!user) return
+
     try {
-      // In a real app, we'd filter by user ID
-      // For demo, we'll show all applications but limit to recent ones
       const { data, error } = await supabase
         .from('applications')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(5)
 
       if (error) {
         console.error('Error fetching applications:', error)
@@ -58,6 +66,16 @@ export default function CustomerPortal() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (authLoading || loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center py-12">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   const renderOverview = () => {
@@ -120,11 +138,7 @@ export default function CustomerPortal() {
             <h3 className="text-xl font-bold text-gray-900">Recent Applications</h3>
           </div>
           <div className="divide-y divide-gray-200">
-            {loading ? (
-              <div className="p-6 text-center text-gray-500">
-                Loading your applications...
-              </div>
-            ) : applications.length === 0 ? (
+            {applications.length === 0 ? (
               <div className="p-6 text-center text-gray-500">
                 <p>No applications found.</p>
                 <a 
@@ -206,11 +220,7 @@ export default function CustomerPortal() {
       </div>
 
       <div className="space-y-4">
-        {loading ? (
-          <div className="bg-white rounded-lg shadow-sm border p-6 text-center text-gray-500">
-            Loading your applications...
-          </div>
-        ) : applications.length === 0 ? (
+        {applications.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border p-6 text-center text-gray-500">
             <p>No applications found.</p>
             <a 

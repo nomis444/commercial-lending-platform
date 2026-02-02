@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { demoAuth } from '@/lib/demo/auth'
+import { createClient } from '@/lib/supabase/client'
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -18,6 +18,7 @@ export default function SignUpPage() {
   const [error, setError] = useState('')
   
   const router = useRouter()
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,24 +32,37 @@ export default function SignUpPage() {
     }
 
     try {
-      const user = await demoAuth.signUp(
-        formData.email,
-        formData.password,
-        formData.name,
-        formData.role,
-        formData.company
-      )
-      
-      // Redirect based on user role
-      switch (user.role) {
-        case 'borrower':
-          router.push('/customer')
-          break
-        case 'investor':
-          router.push('/investor')
-          break
-        default:
-          router.push('/')
+      // Sign up the user
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            company_name: formData.company,
+            role: formData.role,
+          },
+        },
+      })
+
+      if (signUpError) {
+        setError(signUpError.message)
+        return
+      }
+
+      if (data.user) {
+        // Redirect based on role
+        switch (formData.role) {
+          case 'borrower':
+            router.push('/customer')
+            break
+          case 'investor':
+            router.push('/investor')
+            break
+          default:
+            router.push('/')
+        }
+        router.refresh()
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account')

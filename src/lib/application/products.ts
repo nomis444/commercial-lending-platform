@@ -21,7 +21,7 @@ export const LOAN_PRODUCTS: Record<LoanProductType, LoanProduct> = {
     maxAmount: 8000,
     baseRate: 0.25, // 25% APR
     termOptions: [12, 24],
-    requiredSteps: ['welcome', 'business_info', 'loan_details', 'banking_info', 'review'],
+    requiredSteps: ['welcome', 'business_info', 'loan_details', 'banking_info', 'review', 'create_account'],
     features: [
       'Instant approval decision',
       'Minimal documentation',
@@ -36,7 +36,7 @@ export const LOAN_PRODUCTS: Record<LoanProductType, LoanProduct> = {
     maxAmount: 50000,
     baseRate: 0.25, // 25% APR
     termOptions: [12, 24, 36, 48],
-    requiredSteps: ['welcome', 'business_info', 'contact_info', 'loan_details', 'financial_info', 'banking_info', 'documents', 'review'],
+    requiredSteps: ['welcome', 'business_info', 'contact_info', 'loan_details', 'financial_info', 'banking_info', 'documents', 'review', 'create_account'],
     features: [
       'Competitive rates',
       'Flexible repayment terms',
@@ -51,7 +51,7 @@ export const LOAN_PRODUCTS: Record<LoanProductType, LoanProduct> = {
     maxAmount: 200000,
     baseRate: 0.25, // 25% APR
     termOptions: [12, 24, 36, 48, 60],
-    requiredSteps: ['welcome', 'business_info', 'contact_info', 'loan_details', 'financial_info', 'banking_info', 'documents', 'review'],
+    requiredSteps: ['welcome', 'business_info', 'contact_info', 'loan_details', 'financial_info', 'banking_info', 'documents', 'review', 'create_account'],
     features: [
       'Largest loan amounts',
       'Extended repayment options',
