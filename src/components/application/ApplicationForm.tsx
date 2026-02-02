@@ -181,6 +181,7 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
                 company_name: formData.businessName,
                 role: 'borrower',
               },
+              emailRedirectTo: `${window.location.origin}/customer`,
             },
           })
 
@@ -223,10 +224,24 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
         applicationEngine.saveStepData(session.id, formData)
 
         // Now submit the application with the user's ID
-        const submittedSession = await applicationEngine.submitApplication(session.id, userId)
-        
-        if (submittedSession && onComplete) {
-          onComplete(submittedSession)
+        try {
+          const submittedSession = await applicationEngine.submitApplication(session.id, userId)
+          
+          if (submittedSession && onComplete) {
+            onComplete(submittedSession)
+          }
+        } catch (submitError) {
+          console.error('Application submission error:', submitError)
+          const errorMsg = submitError instanceof Error ? submitError.message : 'Failed to save application'
+          
+          // Show more helpful error message
+          if (errorMsg.includes('user_id')) {
+            alert('Database error: Please contact support. Your account was created but the application could not be saved.')
+          } else {
+            alert(`Failed to save application: ${errorMsg}`)
+          }
+          setIsLoading(false)
+          return
         }
       }
     } catch (error) {
