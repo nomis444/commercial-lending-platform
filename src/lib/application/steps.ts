@@ -392,14 +392,21 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
         id: 'loanAmount',
         name: 'loanAmount',
         label: 'Loan Amount Requested',
-        type: 'number',
+        type: 'select',
         required: true,
-        placeholder: '250000',
-        helpText: 'Enter the amount you need to borrow',
+        options: Array.from(
+          { length: (50000 - 10000) / 1000 + 1 },
+          (_, i) => {
+            const amount = 10000 + (i * 1000)
+            return {
+              value: amount.toString(),
+              label: `$${amount.toLocaleString()}`
+            }
+          }
+        ),
+        helpText: 'Select your loan amount ($10,000 - $50,000)',
         validation: [
-          { type: 'required', message: 'Loan amount is required' },
-          { type: 'min', value: 10000, message: 'Minimum loan amount is $10,000' },
-          { type: 'max', value: 5000000, message: 'Maximum loan amount is $5,000,000' }
+          { type: 'required', message: 'Loan amount is required' }
         ]
       },
       {
@@ -424,16 +431,16 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
       {
         id: 'loanTerm',
         name: 'loanTerm',
-        label: 'Preferred Loan Term (months)',
+        label: 'Preferred Loan Term',
         type: 'select',
         required: true,
         options: [
           { value: '12', label: '12 months' },
           { value: '24', label: '24 months' },
           { value: '36', label: '36 months' },
-          { value: '48', label: '48 months' },
-          { value: '60', label: '60 months' }
+          { value: '48', label: '48 months' }
         ],
+        helpText: 'Longer terms have lower monthly payments but higher total interest',
         validation: [
           { type: 'required', message: 'Please select your preferred loan term' }
         ]
