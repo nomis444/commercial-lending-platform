@@ -19,6 +19,7 @@ export default function AdminPortal() {
   const [selectedLoan, setSelectedLoan] = useState<string | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   useEffect(() => {
     checkUserAndFetchData()
@@ -71,8 +72,37 @@ export default function AdminPortal() {
   const pendingReview = applications.filter(app => app.status === 'submitted').length
   const approvalRate = totalLoans > 0 ? Math.round((applications.filter(app => app.status !== 'rejected').length / totalLoans) * 100) : 0
 
-  const handleLoanAction = (loanId: string, action: string) => {
-    alert(`${action} action for loan ${loanId} executed! (Demo mode)`)
+  const handleLoanAction = async (loanId: string, action: 'approve' | 'reject' | 'under_review') => {
+    setActionLoading(loanId)
+    
+    try {
+      const supabase = createClient()
+      
+      const statusMap = {
+        approve: 'approved',
+        reject: 'rejected',
+        under_review: 'under_review'
+      }
+      
+      const { error } = await supabase
+        .from('applications')
+        .update({ status: statusMap[action] })
+        .eq('id', loanId)
+      
+      if (error) {
+        console.error('Error updating application:', error)
+        alert(`Failed to ${action} application: ${error.message}`)
+      } else {
+        alert(`Application ${action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'moved to review'}!`)
+        // Refresh applications
+        await fetchApplications()
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert(`Failed to ${action} application`)
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const renderOverview = () => (
@@ -238,20 +268,23 @@ export default function AdminPortal() {
                 </div>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => handleLoanAction(app.id, 'Approve')}
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    onClick={() => handleLoanAction(app.id, 'approve')}
+                    disabled={actionLoading === app.id}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Approve
+                    {actionLoading === app.id ? 'Processing...' : 'Approve'}
                   </button>
                   <button
-                    onClick={() => handleLoanAction(app.id, 'Request More Info')}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm"
+                    onClick={() => handleLoanAction(app.id, 'under_review')}
+                    disabled={actionLoading === app.id}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    More Info
+                    Review
                   </button>
                   <button
-                    onClick={() => handleLoanAction(app.id, 'Reject')}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    onClick={() => handleLoanAction(app.id, 'reject')}
+                    disabled={actionLoading === app.id}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Reject
                   </button>
@@ -363,12 +396,22 @@ export default function AdminPortal() {
                       View
                     </button>
                     {app.status === 'submitted' && (
-                      <button
-                        onClick={() => handleLoanAction(app.id, 'Review')}
-                        className="text-green-600 hover:text-green-900"
-                      >
-                        Review
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleLoanAction(app.id, 'approve')}
+                          disabled={actionLoading === app.id}
+                          className="text-green-600 hover:text-green-900 mr-3 disabled:opacity-50"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleLoanAction(app.id, 'reject')}
+                          disabled={actionLoading === app.id}
+                          className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                        >
+                          Reject
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
