@@ -79,9 +79,7 @@ export function getLoanDetailsStep(productType?: LoanProductType): ApplicationSt
           target: 'additional_docs'
         }
       ]
-    }
   }
-  
 }
 
 export const APPLICATION_STEPS: ApplicationStep[] = [
