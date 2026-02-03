@@ -442,28 +442,61 @@ export default function AdminPortal() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <h4 className="text-xl font-bold text-gray-900 mb-3">Business Information</h4>
-                      <div className="space-y-2 text-sm">
-                        <div><strong>Name:</strong> {app.business_info?.businessName || 'N/A'}</div>
-                        <div><strong>Industry:</strong> {app.business_info?.industry || 'N/A'}</div>
-                        <div><strong>Annual Revenue:</strong> {formatCurrency(app.financial_info?.annualRevenue || 0)}</div>
-                        <div><strong>Years in Business:</strong> {app.business_info?.yearsInBusiness || 'N/A'}</div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-3">Business Information</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <div><strong className="text-gray-900">Name:</strong> {app.business_info?.businessName || 'N/A'}</div>
+                        <div><strong className="text-gray-900">Industry:</strong> {app.business_info?.industry || 'N/A'}</div>
+                        <div><strong className="text-gray-900">Annual Revenue:</strong> {formatCurrency(app.financial_info?.annualRevenue || 0)}</div>
+                        <div><strong className="text-gray-900">Years in Business:</strong> {app.business_info?.yearsInBusiness || 'N/A'}</div>
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold text-gray-900 mb-3">Loan Details</h4>
-                      <div className="space-y-2 text-sm">
-                        <div><strong>Amount:</strong> {formatCurrency(app.loan_amount || 0)}</div>
-                        <div><strong>Purpose:</strong> {app.loan_purpose || 'N/A'}</div>
-                        <div><strong>Status:</strong> {app.status}</div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-3">Loan Details</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <div><strong className="text-gray-900">Amount:</strong> {formatCurrency(app.loan_amount || 0)}</div>
+                        <div><strong className="text-gray-900">Purpose:</strong> {app.loan_purpose || 'N/A'}</div>
+                        <div><strong className="text-gray-900">Status:</strong> <span className={`px-2 py-1 rounded text-xs ${getStatusColor(app.status)}`}>{app.status.replace('_', ' ').toUpperCase()}</span></div>
+                        <div><strong className="text-gray-900">Applied:</strong> {formatDate(app.created_at)}</div>
                       </div>
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-xl font-bold text-gray-900 mb-3">Documents</h4>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Documents</h4>
                     <div className="text-sm text-gray-600">
                       Document verification system coming soon
                     </div>
+                  </div>
+                  <div className="flex justify-end space-x-3 pt-4 border-t">
+                    <button
+                      onClick={() => setSelectedLoan(null)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Close
+                    </button>
+                    {app.status === 'submitted' && (
+                      <>
+                        <button
+                          onClick={() => {
+                            handleLoanAction(app.id, 'approve')
+                            setSelectedLoan(null)
+                          }}
+                          disabled={actionLoading === app.id}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md disabled:opacity-50"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleLoanAction(app.id, 'reject')
+                            setSelectedLoan(null)
+                          }}
+                          disabled={actionLoading === app.id}
+                          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               )
