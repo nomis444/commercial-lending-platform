@@ -53,7 +53,8 @@ export default function CustomerPortal() {
     }
 
     const role = user.user_metadata?.role || 'borrower'
-    if (role !== 'borrower') {
+    // Allow borrowers and admins to access customer portal
+    if (role !== 'borrower' && role !== 'admin') {
       window.location.href = '/login'
       return
     }

@@ -30,7 +30,7 @@ export default function AdminSignUpPage() {
     }
 
     try {
-      // Sign up the user with admin role
+      // Sign up the user with admin role - disable auto-login
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -39,6 +39,7 @@ export default function AdminSignUpPage() {
             full_name: formData.name,
             role: 'admin',
           },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       })
 
@@ -48,7 +49,10 @@ export default function AdminSignUpPage() {
       }
 
       if (data.user) {
-        alert('Admin account created successfully! You can now login.')
+        // Sign out immediately to prevent auto-login
+        await supabase.auth.signOut()
+        
+        alert('Admin account created successfully! Please check your email to verify your account, then login.')
         window.location.href = '/login'
       }
     } catch (err) {
