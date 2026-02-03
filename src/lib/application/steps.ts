@@ -6,8 +6,9 @@ export function getLoanDetailsStep(productType?: LoanProductType): ApplicationSt
   const product = productType ? LOAN_PRODUCTS[productType] : LOAN_PRODUCTS.standard
   
   // For Instant Approval, create dropdown options in $500 increments
-  // For Standard/Premium, create dropdown options in $1000 increments
-  const increment = productType === 'instant' ? 500 : 1000
+  // For Standard, create dropdown options in $5000 increments
+  // For Premium, create dropdown options in $1000 increments
+  const increment = productType === 'instant' ? 500 : productType === 'standard' ? 5000 : 1000
   
   return {
       id: 'loan_details',
