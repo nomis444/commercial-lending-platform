@@ -380,50 +380,6 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
       }
     ],
     isRequired: true,
-    nextStepId: 'contact_info'
-  },
-
-  {
-    id: 'contact_info',
-    title: 'Contact Information',
-    description: 'How can we reach you about your application?',
-    fields: [
-      {
-        id: 'contactName',
-        name: 'contactName',
-        label: 'Primary Contact Name',
-        type: 'text',
-        required: true,
-        placeholder: 'Enter the primary contact name',
-        validation: [
-          { type: 'required', message: 'Contact name is required' }
-        ]
-      },
-      {
-        id: 'contactEmail',
-        name: 'contactEmail',
-        label: 'Email Address',
-        type: 'email',
-        required: true,
-        placeholder: 'Enter email address',
-        validation: [
-          { type: 'required', message: 'Email is required' },
-          { type: 'email', message: 'Please enter a valid email address' }
-        ]
-      },
-      {
-        id: 'contactPhone',
-        name: 'contactPhone',
-        label: 'Phone Number',
-        type: 'text',
-        required: true,
-        placeholder: '(555) 123-4567',
-        validation: [
-          { type: 'required', message: 'Phone number is required' }
-        ]
-      }
-    ],
-    isRequired: true,
     nextStepId: 'loan_details'
   },
 
