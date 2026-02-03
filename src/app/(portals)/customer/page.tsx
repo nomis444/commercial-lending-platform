@@ -1,15 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth/hooks'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils/formatting'
-
-// Initialize Supabase client directly
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spznjpzxpssxvgcksgxh.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwem5qcHp4cHNzeHZnY2tzZ3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NjAwMDYsImV4cCI6MjA4NTUzNjAwNn0.O07nASkFwl-xST_Ujz5MuJTuGIZzxJSH0PzHtumbxu4'
-const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
+import type { User } from '@supabase/supabase-js'
 
 interface Application {
   id: string
@@ -27,48 +21,49 @@ export default function CustomerPortal() {
   const [activeTab, setActiveTab] = useState('overview')
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
-  const { user, loading: authLoading } = useAuth()
-  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login')
+    checkUserAndFetchData()
+  }, [])
+
+  async function checkUserAndFetchData() {
+    const supabase = createClient()
+    
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      window.location.href = '/login'
       return
     }
 
-    if (user) {
-      const role = user.user_metadata?.role || 'borrower'
-      if (role !== 'borrower') {
-        router.push('/login')
-        return
-      }
-      fetchUserApplications()
+    const role = user.user_metadata?.role || 'borrower'
+    if (role !== 'borrower') {
+      window.location.href = '/login'
+      return
     }
-  }, [user, authLoading, router])
 
-  const fetchUserApplications = async () => {
-    if (!user) return
-
-    try {
-      const { data, error } = await supabase
-        .from('applications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching applications:', error)
-      } else {
-        setApplications(data || [])
-      }
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
+    setUser(user)
+    await fetchApplications(user.id)
   }
 
-  if (authLoading || loading) {
+  async function fetchApplications(userId: string) {
+    const supabase = createClient()
+    
+    const { data, error } = await supabase
+      .from('applications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (!error && data) {
+      setApplications(data)
+    }
+    
+    setLoading(false)
+  }
+
+  if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center py-12">

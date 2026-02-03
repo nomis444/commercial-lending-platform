@@ -2,23 +2,29 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth/hooks'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 export default function PortalNavigation() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user } = useAuth()
+  const [user, setUser] = useState<User | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
+    checkUser()
+  }, [])
+
+  async function checkUser() {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    setUser(user)
     if (user) {
-      // Get user role from metadata
       const role = user.user_metadata?.role || 'borrower'
       setUserRole(role)
     }
-  }, [user])
+  }
 
   const handleLogout = async () => {
     const supabase = createClient()

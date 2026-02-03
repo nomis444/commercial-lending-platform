@@ -4,22 +4,32 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ApplicationForm from '@/components/application/ApplicationForm'
 import { ApplicationSession } from '@/lib/application/types'
-import { useAuth } from '@/lib/auth/hooks'
+import { createClient } from '@/lib/supabase/client'
 import { getLoanProduct } from '@/lib/application/products'
+import type { User } from '@supabase/supabase-js'
 
 function ApplyPageContent() {
   const [isCompleted, setIsCompleted] = useState(false)
   const [completedSession, setCompletedSession] = useState<ApplicationSession | null>(null)
   const [productType, setProductType] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
 
   useEffect(() => {
     // Get product type from URL parameter
     const product = searchParams.get('product')
     setProductType(product)
+    
+    // Check user
+    checkUser()
   }, [searchParams])
+
+  async function checkUser() {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    setUser(user)
+  }
 
   const handleApplicationComplete = (session: ApplicationSession) => {
     setCompletedSession(session)

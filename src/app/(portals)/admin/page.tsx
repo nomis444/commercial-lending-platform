@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth/hooks'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/utils/formatting'
 
@@ -21,28 +19,33 @@ export default function AdminPortal() {
   const [selectedLoan, setSelectedLoan] = useState<string | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
-  const supabase = createClient()
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        router.push('/login')
-        return
-      }
-      
-      const userRole = user.user_metadata?.role
-      if (userRole !== 'admin') {
-        router.push('/customer')
-        return
-      }
+    checkUserAndFetchData()
+  }, [])
 
-      fetchApplications()
+  async function checkUserAndFetchData() {
+    const supabase = createClient()
+    
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      window.location.href = '/login'
+      return
     }
-  }, [user, authLoading, router])
+
+    const role = user.user_metadata?.role || 'borrower'
+    if (role !== 'admin') {
+      window.location.href = '/customer'
+      return
+    }
+
+    await fetchApplications()
+  }
 
   const fetchApplications = async () => {
+    const supabase = createClient()
+    
     try {
       const { data, error } = await supabase
         .from('applications')

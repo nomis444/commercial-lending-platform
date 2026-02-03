@@ -146,10 +146,8 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
 
       // If this is the create_account step, handle authentication
       if (currentStep.id === 'create_account') {
-        const { createClient } = await import('@supabase/supabase-js')
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spznjpzxpssxvgcksgxh.supabase.co'
-        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwem5qcHp4cHNzeHZnY2tzZ3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NjAwMDYsImV4cCI6MjA4NTUzNjAwNn0.O07nASkFwl-xST_Ujz5MuJTuGIZzxJSH0PzHtumbxu4'
-        const supabase = createClient(supabaseUrl, supabaseAnonKey)
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
 
         const accountMode = formData.accountMode || 'create'
         let userId: string | undefined

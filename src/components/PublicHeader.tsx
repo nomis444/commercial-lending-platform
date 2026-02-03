@@ -1,13 +1,28 @@
 'use client'
 
-import { useAuth } from '@/lib/auth/hooks'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 export default function PublicHeader() {
-  const { user, loading, signOut } = useAuth()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    checkUser()
+  }, [])
+
+  async function checkUser() {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    setUser(user)
+    setLoading(false)
+  }
 
   const handleSignOut = async () => {
     try {
-      await signOut()
+      const supabase = createClient()
+      await supabase.auth.signOut()
       window.location.href = '/'
     } catch (error) {
       console.error('Sign out error:', error)
