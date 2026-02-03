@@ -6,10 +6,10 @@ export function getLoanDetailsStep(productType?: LoanProductType): ApplicationSt
   const product = productType ? LOAN_PRODUCTS[productType] : LOAN_PRODUCTS.standard
   
   // For Instant Approval, create dropdown options in $500 increments
-  const isInstant = productType === 'instant'
+  // For Standard/Premium, create dropdown options in $1000 increments
+  const increment = productType === 'instant' ? 500 : 1000
   
-  if (isInstant) {
-    return {
+  return {
       id: 'loan_details',
       title: 'Loan Requirements',
       description: 'What are you looking to borrow and why?',
@@ -21,16 +21,16 @@ export function getLoanDetailsStep(productType?: LoanProductType): ApplicationSt
           type: 'select',
           required: true,
           options: Array.from(
-            { length: (product.maxAmount - product.minAmount) / 500 + 1 },
+            { length: (product.maxAmount - product.minAmount) / increment + 1 },
             (_, i) => {
-              const amount = product.minAmount + (i * 500)
+              const amount = product.minAmount + (i * increment)
               return {
                 value: amount.toString(),
                 label: `$${amount.toLocaleString()}`
               }
             }
           ),
-          helpText: `Select your loan amount ($${product.minAmount.toLocaleString()} - $${product.maxAmount.toLocaleString()})`,
+          helpText: `Select your loan amount ($$${product.minAmount.toLocaleString()} - $${product.maxAmount.toLocaleString()})`,
           validation: [
             { type: 'required', message: 'Loan amount is required' }
           ]
@@ -82,70 +82,6 @@ export function getLoanDetailsStep(productType?: LoanProductType): ApplicationSt
     }
   }
   
-  return {
-    id: 'loan_details',
-    title: 'Loan Requirements',
-    description: 'What are you looking to borrow and why?',
-    fields: [
-      {
-        id: 'loanAmount',
-        name: 'loanAmount',
-        label: 'Loan Amount Requested',
-        type: 'number',
-        required: true,
-        placeholder: product.minAmount.toString(),
-        helpText: `Enter the amount you need to borrow ($${product.minAmount.toLocaleString()} - $${product.maxAmount.toLocaleString()})`,
-        validation: [
-          { type: 'required', message: 'Loan amount is required' },
-          { type: 'min', value: product.minAmount, message: `Minimum loan amount is $${product.minAmount.toLocaleString()}` },
-          { type: 'max', value: product.maxAmount, message: `Maximum loan amount is $${product.maxAmount.toLocaleString()}` }
-        ]
-      },
-      {
-        id: 'loanPurpose',
-        name: 'loanPurpose',
-        label: 'Purpose of Loan',
-        type: 'select',
-        required: true,
-        options: [
-          { value: 'working_capital', label: 'Working Capital' },
-          { value: 'equipment', label: 'Equipment Purchase' },
-          { value: 'expansion', label: 'Business Expansion' },
-          { value: 'inventory', label: 'Inventory' },
-          { value: 'real_estate', label: 'Real Estate' },
-          { value: 'debt_consolidation', label: 'Debt Consolidation' },
-          { value: 'other', label: 'Other' }
-        ],
-        validation: [
-          { type: 'required', message: 'Please select the purpose of your loan' }
-        ]
-      },
-      {
-        id: 'loanTerm',
-        name: 'loanTerm',
-        label: 'Preferred Loan Term',
-        type: 'select',
-        required: true,
-        options: product.termOptions.map(term => ({
-          value: term.toString(),
-          label: `${term} months`
-        })),
-        helpText: 'Longer terms have lower monthly payments but higher total interest',
-        validation: [
-          { type: 'required', message: 'Please select your preferred loan term' }
-        ]
-      }
-    ],
-    isRequired: true,
-    nextStepId: 'financial_info',
-    conditionalLogic: [
-      {
-        condition: { field: 'loanAmount', operator: 'greater_than', value: 500000 },
-        action: 'show_step',
-        target: 'additional_docs'
-      }
-    ]
-  }
 }
 
 export const APPLICATION_STEPS: ApplicationStep[] = [
@@ -395,16 +331,16 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
         type: 'select',
         required: true,
         options: Array.from(
-          { length: (50000 - 10000) / 1000 + 1 },
+          { length: (50000 - 10000) / 5000 + 1 },
           (_, i) => {
-            const amount = 10000 + (i * 1000)
+            const amount = 10000 + (i * 5000)
             return {
               value: amount.toString(),
               label: `$${amount.toLocaleString()}`
             }
           }
         ),
-        helpText: 'Select your loan amount ($10,000 - $50,000)',
+        helpText: 'Select your loan amount ($$10,000 - $50,000)',
         validation: [
           { type: 'required', message: 'Loan amount is required' }
         ]
