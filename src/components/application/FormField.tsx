@@ -157,19 +157,15 @@ export default function FormFieldComponent({ field, value, onChange, error }: Fo
               onChange={(e) => {
                 const file = e.target.files?.[0]
                 if (file) {
-                  onChange({
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    lastModified: file.lastModified
-                  })
+                  // Store the actual File object, not just metadata
+                  onChange(file)
                 }
               }}
               required={field.required}
               className={`${baseClasses} ${errorClasses} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100`}
               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
             />
-            {value && (
+            {value && value instanceof File && (
               <div className="mt-2 text-sm text-gray-600">
                 Selected: {value.name} ({Math.round(value.size / 1024)} KB)
               </div>

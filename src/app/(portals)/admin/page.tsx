@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/utils/formatting'
+import DocumentsList from '@/components/DocumentsList'
 
 interface Application {
   id: string
@@ -462,9 +463,11 @@ export default function AdminPortal() {
                   </div>
                   <div>
                     <h4 className="text-lg font-bold text-gray-900 mb-3">Documents</h4>
-                    <div className="text-sm text-gray-600">
-                      Document verification system coming soon
-                    </div>
+                    <DocumentsList 
+                      applicationId={app.id} 
+                      canDelete={false} 
+                      canUpload={false}
+                    />
                   </div>
                   <div className="flex justify-end space-x-3 pt-4 border-t">
                     <button
