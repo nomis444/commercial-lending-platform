@@ -32,6 +32,34 @@ export default function FormFieldComponent({ field, value, onChange, error }: Fo
         )
 
       case 'number':
+        // Check if this is a currency field based on field name
+        const isCurrencyField = ['annualRevenue', 'monthlyRevenue', 'monthlyExpenses', 'existingDebt', 'averageBalance'].includes(field.name)
+        
+        if (isCurrencyField) {
+          // Format display value with commas
+          const displayValue = value ? Number(value).toLocaleString() : ''
+          
+          return (
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <input
+                type="text"
+                id={field.id}
+                name={field.name}
+                value={displayValue}
+                onChange={(e) => {
+                  // Remove commas and non-numeric characters except digits
+                  const numericValue = e.target.value.replace(/[^0-9]/g, '')
+                  onChange(numericValue)
+                }}
+                placeholder={field.placeholder}
+                required={field.required}
+                className={`${baseClasses} ${errorClasses} pl-7`}
+              />
+            </div>
+          )
+        }
+        
         return (
           <input
             type="number"
