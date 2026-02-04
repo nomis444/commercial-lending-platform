@@ -199,7 +199,7 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
           userId = authData.user.id
         } else {
           // Sign in to existing account
-          const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+          const { data: authData, error: signInError} = await supabase.auth.signInWithPassword({
             email: formData.accountEmail,
             password: formData.accountPassword,
           })
@@ -226,8 +226,21 @@ export default function ApplicationForm({ sessionId, onComplete, productType }: 
         try {
           const submittedSession = await applicationEngine.submitApplication(session.id, userId)
           
-          if (submittedSession && onComplete) {
-            onComplete(submittedSession)
+          if (submittedSession && submittedSession.applicationId) {
+            // Upload documents after application is created
+            const { uploadDocument } = await import('@/lib/documents')
+            const documentFields = ['bankStatements', 'taxReturns', 'financialStatements']
+            
+            for (const fieldName of documentFields) {
+              const fileData = formData[fieldName]
+              if (fileData && fileData instanceof File) {
+                await uploadDocument(fileData, submittedSession.applicationId, fieldName)
+              }
+            }
+            
+            if (onComplete) {
+              onComplete(submittedSession)
+            }
           }
         } catch (submitError) {
           console.error('Application submission error:', submitError)

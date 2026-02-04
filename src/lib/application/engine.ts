@@ -135,7 +135,7 @@ export class ApplicationEngine {
   }
 
   // Submit application
-  async submitApplication(sessionId: string, userId?: string): Promise<ApplicationSession | null> {
+  async submitApplication(sessionId: string, userId?: string): Promise<ApplicationSession & { applicationId?: string } | null> {
     const session = this.getSession(sessionId)
     if (!session) return null
 
@@ -204,7 +204,9 @@ export class ApplicationEngine {
       this.sessions.set(sessionId, session)
 
       console.log('Application submitted successfully to Supabase:', application)
-      return session
+      
+      // Return session with application ID
+      return { ...session, applicationId: application.id }
 
     } catch (error) {
       console.error('Submission error:', error)
