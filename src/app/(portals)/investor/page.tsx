@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/utils/formatting'
+import { createInvestment, getInvestorPortfolio, calculateTotalInvested, type InvestmentWithDetails } from '@/lib/investments'
 
 interface Application {
   id: string
@@ -13,6 +14,8 @@ interface Application {
   financial_info: any
   contact_info: any
   created_at: string
+  funded_amount: number
+  funding_status: string
 }
 
 export default function InvestorPortal() {
@@ -20,6 +23,10 @@ export default function InvestorPortal() {
   const [selectedLoan, setSelectedLoan] = useState<string | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
+  const [investmentAmounts, setInvestmentAmounts] = useState<Record<string, number>>({})
+  const [investing, setInvesting] = useState<Record<string, boolean>>({})
+  const [portfolio, setPortfolio] = useState<InvestmentWithDetails[]>([])
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     checkUserAndFetchData()
@@ -35,6 +42,8 @@ export default function InvestorPortal() {
       return
     }
 
+    setUserId(user.id)
+
     const role = user.user_metadata?.role || 'borrower'
     if (role !== 'investor' && role !== 'admin') {
       window.location.href = '/customer'
@@ -42,6 +51,7 @@ export default function InvestorPortal() {
     }
 
     await fetchInvestmentOpportunities()
+    await fetchPortfolio(user.id)
   }
 
   const fetchInvestmentOpportunities = async () => {
@@ -58,7 +68,20 @@ export default function InvestorPortal() {
       if (error) {
         console.error('Error fetching applications:', error)
       } else {
-        setApplications(data || [])
+        const appsWithDefaults = (data || []).map(app => ({
+          ...app,
+          funded_amount: app.funded_amount || 0,
+          funding_status: app.funding_status || 'unfunded'
+        }))
+        setApplications(appsWithDefaults)
+        
+        // Initialize investment amounts to minimum $1,000
+        const amounts: Record<string, number> = {}
+        appsWithDefaults.forEach(app => {
+          const remaining = app.loan_amount - app.funded_amount
+          amounts[app.id] = Math.min(1000, remaining)
+        })
+        setInvestmentAmounts(amounts)
       }
     } catch (error) {
       console.error('Error:', error)
@@ -67,12 +90,58 @@ export default function InvestorPortal() {
     }
   }
 
-  const handleInvest = (loanId: string, amount: number) => {
-    alert(`Investment of ${formatCurrency(amount)} in loan ${loanId} submitted! (Demo mode)`)
+  const fetchPortfolio = async (investorId: string) => {
+    try {
+      const investments = await getInvestorPortfolio(investorId)
+      setPortfolio(investments)
+    } catch (error) {
+      console.error('Error fetching portfolio:', error)
+    }
+  }
+
+  const handleSliderChange = (loanId: string, value: number) => {
+    setInvestmentAmounts(prev => ({
+      ...prev,
+      [loanId]: value
+    }))
+  }
+
+  const handleInvest = async (applicationId: string) => {
+    if (!userId) {
+      alert('You must be logged in to invest')
+      return
+    }
+
+    const amount = investmentAmounts[applicationId]
+    if (!amount || amount < 1000) {
+      alert('Investment amount must be at least $1,000')
+      return
+    }
+
+    setInvesting(prev => ({ ...prev, [applicationId]: true }))
+
+    try {
+      await createInvestment({
+        applicationId,
+        investorId: userId,
+        amount
+      })
+
+      alert(`Investment of ${formatCurrency(amount)} submitted successfully!`)
+      
+      // Refresh data
+      await fetchInvestmentOpportunities()
+      await fetchPortfolio(userId)
+    } catch (error: any) {
+      alert(`Investment failed: ${error.message}`)
+    } finally {
+      setInvesting(prev => ({ ...prev, [applicationId]: false }))
+    }
   }
 
   const renderOpportunities = () => {
     const totalAvailableAmount = applications.reduce((sum, app) => sum + (app.loan_amount || 0), 0)
+    const totalInvested = calculateTotalInvested(portfolio)
     
     return (
       <div className="space-y-6">
@@ -114,7 +183,7 @@ export default function InvestorPortal() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">My Investments</p>
-                <p className="text-2xl font-bold text-gray-900">$0</p>
+                <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalInvested)}</p>
               </div>
             </div>
           </div>
@@ -127,8 +196,8 @@ export default function InvestorPortal() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Returns</p>
-                <p className="text-2xl font-bold text-gray-900">$0</p>
+                <p className="text-sm font-medium text-gray-600">Portfolio Count</p>
+                <p className="text-2xl font-bold text-gray-900">{portfolio.length}</p>
               </div>
             </div>
           </div>
@@ -150,101 +219,202 @@ export default function InvestorPortal() {
                 <p className="text-sm text-gray-400 mt-2">Check back later for new loan applications</p>
               </div>
             ) : (
-              applications.map((app) => (
-                <div key={app.id} className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h4 className="text-xl font-bold text-gray-900">
-                            {app.business_info?.businessName || 'Business Loan Opportunity'}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {app.business_info?.industry || 'Business'} • {app.loan_purpose || 'General Business'}
-                          </p>
+              applications.map((app) => {
+                const fundedAmount = app.funded_amount || 0
+                const fundingPercentage = (fundedAmount / app.loan_amount) * 100
+                const remainingAmount = app.loan_amount - fundedAmount
+                const investmentAmount = investmentAmounts[app.id] || 1000
+                const investmentPercentage = (investmentAmount / app.loan_amount) * 100
+                const isInvesting = investing[app.id] || false
+                
+                return (
+                  <div key={app.id} className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="text-xl font-bold text-gray-900">
+                              {app.business_info?.businessName || 'Business Loan Opportunity'}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {app.business_info?.industry || 'Business'} • {app.loan_purpose || 'General Business'}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-1 rounded text-xs ${getRiskColor('medium')}`}>
+                              MEDIUM RISK
+                            </span>
+                            <span className={`px-2 py-1 rounded text-xs ${getStatusColor(app.status)}`}>
+                              {app.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className={`px-2 py-1 rounded text-xs ${getRiskColor('medium')}`}>
-                            MEDIUM RISK
-                          </span>
-                          <span className={`px-2 py-1 rounded text-xs ${getStatusColor(app.status)}`}>
-                            {app.status.replace('_', ' ').toUpperCase()}
-                          </span>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div>
+                            <p className="text-sm text-gray-600">Loan Amount</p>
+                            <p className="text-xl font-bold text-gray-900">{formatCurrency(app.loan_amount || 0)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Available</p>
+                            <p className="text-xl font-bold text-gray-900">{formatCurrency(remainingAmount)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Est. Interest Rate</p>
+                            <p className="text-xl font-bold text-gray-900">8.5%</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Est. Term</p>
+                            <p className="text-xl font-bold text-gray-900">36 months</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Loan Amount</p>
-                          <p className="text-xl font-bold text-gray-900">{formatCurrency(app.loan_amount || 0)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Available</p>
-                          <p className="text-xl font-bold text-gray-900">{formatCurrency(app.loan_amount || 0)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Est. Interest Rate</p>
-                          <p className="text-xl font-bold text-gray-900">8.5%</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Est. Term</p>
-                          <p className="text-xl font-bold text-gray-900">36 months</p>
-                        </div>
-                      </div>
 
-                      <div className="mb-4">
-                        <div className="flex justify-between text-sm text-gray-600 mb-2">
-                          <span>Funding Progress</span>
-                          <span>0% Funded</span>
+                        <div className="mb-4">
+                          <div className="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>Funding Progress</span>
+                            <span>{fundingPercentage.toFixed(1)}% Funded</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.min(fundingPercentage, 100)}%` }} />
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-blue-600 h-2 rounded-full" style={{ width: '0%' }} />
-                        </div>
-                      </div>
 
-                      <div className="flex justify-between items-center">
-                        <div className="text-sm text-gray-600">
-                          <span>Annual Revenue: {formatCurrency(app.financial_info?.annualRevenue || 0)}</span>
-                          <span className="ml-4">Applied: {formatDate(app.created_at)}</span>
+                        {/* Investment Slider */}
+                        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-sm font-medium text-gray-700">Investment Amount</label>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-blue-600">{formatCurrency(investmentAmount)}</div>
+                              <div className="text-xs text-gray-500">{investmentPercentage.toFixed(2)}% of loan</div>
+                            </div>
+                          </div>
+                          <input
+                            type="range"
+                            min="1000"
+                            max={remainingAmount}
+                            step="1000"
+                            value={investmentAmount}
+                            onChange={(e) => handleSliderChange(app.id, parseInt(e.target.value))}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                            disabled={isInvesting || remainingAmount < 1000}
+                          />
+                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>$1,000</span>
+                            <span>{formatCurrency(remainingAmount)}</span>
+                          </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => setSelectedLoan(selectedLoan === app.id ? null : app.id)}
-                            className="text-blue-600 hover:text-blue-900 text-sm font-medium"
-                          >
-                            View Details
-                          </button>
-                          <button
-                            onClick={() => handleInvest(app.id, 10000)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium"
-                          >
-                            Invest
-                          </button>
+
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm text-gray-600">
+                            <span>Annual Revenue: {formatCurrency(app.financial_info?.annualRevenue || 0)}</span>
+                            <span className="ml-4">Applied: {formatDate(app.created_at)}</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => setSelectedLoan(selectedLoan === app.id ? null : app.id)}
+                              className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                            >
+                              View Details
+                            </button>
+                            <button
+                              onClick={() => handleInvest(app.id)}
+                              disabled={isInvesting || remainingAmount < 1000}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                              {isInvesting ? 'Processing...' : 'Invest'}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </div>
       </div>
     )
   }
-  const renderPortfolio = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">My Investment Portfolio</h2>
-      
-      <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
-        <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        <p className="text-gray-500">No investments yet</p>
-        <p className="text-sm text-gray-400 mt-2">Your investment portfolio will appear here once you start investing</p>
+  const renderPortfolio = () => {
+    const totalInvested = calculateTotalInvested(portfolio)
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">My Investment Portfolio</h2>
+          <div className="text-right">
+            <p className="text-sm text-gray-600">Total Invested</p>
+            <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalInvested)}</p>
+          </div>
+        </div>
+        
+        {portfolio.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
+            <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <p className="text-gray-500">No investments yet</p>
+            <p className="text-sm text-gray-400 mt-2">Your investment portfolio will appear here once you start investing</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="divide-y divide-gray-200">
+              {portfolio.map((investment) => {
+                const app = investment.applications
+                const fundingPercentage = ((app.funded_amount || 0) / app.loan_amount) * 100
+                
+                return (
+                  <div key={investment.id} className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="text-lg font-bold text-gray-900">
+                          {app.business_info?.businessName || 'Business Loan'}
+                        </h4>
+                        <p className="text-sm text-gray-600">{app.loan_purpose || 'General Business'}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs ${getStatusColor(app.status)}`}>
+                        {app.status.replace('_', ' ').toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-gray-600">My Investment</p>
+                        <p className="text-lg font-bold text-gray-900">{formatCurrency(investment.amount)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">My Share</p>
+                        <p className="text-lg font-bold text-gray-900">{investment.percentage.toFixed(2)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Total Loan</p>
+                        <p className="text-lg font-bold text-gray-900">{formatCurrency(app.loan_amount)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Investment Date</p>
+                        <p className="text-lg font-bold text-gray-900">{formatDate(investment.created_at)}</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>Loan Funding Progress</span>
+                        <span>{fundingPercentage.toFixed(1)}% Funded</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.min(fundingPercentage, 100)}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
