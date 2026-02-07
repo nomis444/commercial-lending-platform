@@ -151,6 +151,22 @@ export class ApplicationEngine {
         throw new Error('User must be logged in to submit application')
       }
 
+      // Prepare payment_info if payment account data exists
+      let paymentInfo = null
+      if (session.formData.routingNumber && session.formData.accountNumber) {
+        paymentInfo = {
+          bankName: session.formData.paymentBankName,
+          accountHolderName: session.formData.accountHolderName,
+          routingNumber: session.formData.routingNumber,
+          accountNumber: session.formData.accountNumber,
+          accountType: session.formData.paymentAccountType,
+          plaidAccountId: null,
+          plaidAccessToken: null,
+          verificationStatus: 'pending_manual',
+          submittedAt: new Date().toISOString()
+        }
+      }
+
       // Save application to Supabase with user_id
       const { data: application, error: appError } = await supabase
         .from('applications')
@@ -159,6 +175,7 @@ export class ApplicationEngine {
           status: 'submitted',
           loan_amount: session.formData.loanAmount,
           loan_purpose: session.formData.loanPurpose,
+          payment_info: paymentInfo,
           business_info: {
             businessName: session.formData.businessName,
             taxId: session.formData.taxId,

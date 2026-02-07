@@ -494,6 +494,91 @@ export const APPLICATION_STEPS: ApplicationStep[] = [
       }
     ],
     isRequired: true,
+    nextStepId: 'payment_account'
+  },
+
+  {
+    id: 'payment_account',
+    title: 'Payment Account Information',
+    description: 'Provide your bank account information for automatic loan payments.',
+    fields: [
+      {
+        id: 'paymentBankName',
+        name: 'paymentBankName',
+        label: 'Bank Name',
+        type: 'text',
+        required: true,
+        placeholder: 'Bank of America',
+        helpText: 'The bank where your payment account is held',
+        validation: [
+          { type: 'required', message: 'Bank name is required' }
+        ]
+      },
+      {
+        id: 'accountHolderName',
+        name: 'accountHolderName',
+        label: 'Account Holder Name',
+        type: 'text',
+        required: true,
+        placeholder: 'John Smith or ABC Company LLC',
+        helpText: 'Name as it appears on the bank account',
+        validation: [
+          { type: 'required', message: 'Account holder name is required' }
+        ]
+      },
+      {
+        id: 'routingNumber',
+        name: 'routingNumber',
+        label: 'Routing Number',
+        type: 'text',
+        required: true,
+        placeholder: '123456789',
+        helpText: 'Your bank\'s 9-digit routing number',
+        validation: [
+          { type: 'required', message: 'Routing number is required' },
+          { type: 'pattern', value: '^[0-9]{9}$', message: 'Routing number must be exactly 9 digits' }
+        ]
+      },
+      {
+        id: 'accountNumber',
+        name: 'accountNumber',
+        label: 'Account Number',
+        type: 'text',
+        required: true,
+        placeholder: '1234567890',
+        helpText: 'Your bank account number (4-17 digits)',
+        validation: [
+          { type: 'required', message: 'Account number is required' },
+          { type: 'pattern', value: '^[0-9]{4,17}$', message: 'Account number must be between 4 and 17 digits' }
+        ]
+      },
+      {
+        id: 'paymentAccountType',
+        name: 'paymentAccountType',
+        label: 'Account Type',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'checking', label: 'Checking' },
+          { value: 'savings', label: 'Savings' }
+        ],
+        validation: [
+          { type: 'required', message: 'Please select your account type' }
+        ]
+      },
+      {
+        id: 'paymentAccountConfirm',
+        name: 'paymentAccountConfirm',
+        label: 'I confirm this information is accurate',
+        type: 'checkbox',
+        required: true,
+        helpText: 'IMPORTANT: This information cannot be changed after submission. It will be verified through our payment processor.',
+        validation: [
+          { type: 'required', message: 'You must confirm the account information is accurate' }
+        ]
+      }
+    ],
+    isRequired: true,
     nextStepId: 'documents'
   },
 

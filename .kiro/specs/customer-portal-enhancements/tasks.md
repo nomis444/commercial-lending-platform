@@ -136,8 +136,8 @@ The implementation will add profile management, payment account collection, loan
     - Test error handling for database failures
     - _Requirements: 1.3, 1.4, 1.5, 1.6, 1.7, 1.8_
 
-- [ ] 5. Payment account collection in application flow
-  - [ ] 5.1 Add payment account step to application steps
+- [-] 5. Payment account collection in application flow
+  - [x] 5.1 Add payment account step to application steps
     - Update src/lib/application/steps.ts
     - Create PAYMENT_ACCOUNT_STEP definition with all fields
     - Insert step before 'documents' for Standard/Premium
@@ -154,7 +154,7 @@ The implementation will add profile management, payment account collection, loan
     - Style consistently with existing application form
     - _Requirements: 2.4, 2.5, 2.6, 2.7_
   
-  - [ ] 5.3 Update application engine to handle payment account data
+  - [x] 5.3 Update application engine to handle payment account data
     - Update src/lib/application/engine.ts
     - Add payment account validation to validateStepData
     - Store payment_info in JSONB field on submission
