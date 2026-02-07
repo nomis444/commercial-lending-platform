@@ -512,10 +512,13 @@ export default function InvestorPortal() {
                       Close
                     </button>
                     <button
-                      onClick={() => handleInvest(app.id, 25000)}
+                      onClick={() => {
+                        setSelectedLoan(null)
+                        setActiveTab('opportunities')
+                      }}
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium"
                     >
-                      Invest Now
+                      View Investment Options
                     </button>
                   </div>
                 </div>
