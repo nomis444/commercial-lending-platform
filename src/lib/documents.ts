@@ -163,27 +163,24 @@ export async function deleteDocument(documentId: string): Promise<boolean> {
 }
 
 /**
- * Get a signed URL for downloading a document
+ * Get a public URL for viewing/downloading a document
  */
 export async function getDocumentUrl(storagePath: string): Promise<string | null> {
   try {
     const supabase = createClient()
     
-    // Use download instead of createSignedUrl to avoid RLS issues
-    const { data, error } = await supabase.storage
+    // Get the public URL for the document
+    const { data } = supabase.storage
       .from('documents')
-      .download(storagePath)
+      .getPublicUrl(storagePath)
     
-    if (error) {
-      console.error('Error downloading document:', error)
+    if (!data || !data.publicUrl) {
+      console.error('Failed to get public URL')
       return null
     }
     
-    // Create a blob URL from the downloaded data
-    const blob = new Blob([data], { type: data.type })
-    const url = URL.createObjectURL(blob)
-    
-    return url
+    console.log('Generated public URL:', data.publicUrl)
+    return data.publicUrl
   } catch (error) {
     console.error('Error creating document URL:', error)
     return null
