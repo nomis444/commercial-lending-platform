@@ -1,5 +1,3 @@
--- Run this in your Supabase SQL Editor to fix document upload permissions
-
 -- Fix documents table RLS policies to work with user_id instead of tenant_id
 
 -- Drop old tenant-based policies
