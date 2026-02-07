@@ -169,18 +169,23 @@ export async function getDocumentUrl(storagePath: string): Promise<string | null
   try {
     const supabase = createClient()
     
+    // Use download instead of createSignedUrl to avoid RLS issues
     const { data, error } = await supabase.storage
       .from('documents')
-      .createSignedUrl(storagePath, 3600) // 1 hour expiry
+      .download(storagePath)
     
     if (error) {
-      console.error('Error creating signed URL:', error)
+      console.error('Error downloading document:', error)
       return null
     }
     
-    return data.signedUrl
+    // Create a blob URL from the downloaded data
+    const blob = new Blob([data], { type: data.type })
+    const url = URL.createObjectURL(blob)
+    
+    return url
   } catch (error) {
-    console.error('Error creating signed URL:', error)
+    console.error('Error creating document URL:', error)
     return null
   }
 }
