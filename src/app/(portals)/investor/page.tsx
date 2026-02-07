@@ -48,11 +48,11 @@ export default function InvestorPortal() {
     const supabase = createClient()
     
     try {
-      // Fetch approved applications that are available for investment
+      // Fetch only approved applications that are available for investment
       const { data, error } = await supabase
         .from('applications')
         .select('*')
-        .in('status', ['submitted', 'approved']) // Show submitted and approved loans
+        .eq('status', 'approved') // Only show approved loans
         .order('created_at', { ascending: false })
 
       if (error) {
