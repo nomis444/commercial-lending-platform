@@ -34,6 +34,13 @@ export default function PublicHeader() {
     return user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
   }
 
+  const getDashboardUrl = () => {
+    const role = user?.user_metadata?.role || 'borrower'
+    if (role === 'admin') return '/admin'
+    if (role === 'investor') return '/investor'
+    return '/customer'
+  }
+
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,6 +67,12 @@ export default function PublicHeader() {
               <>
                 {user ? (
                   <div className="flex items-center space-x-4">
+                    <a 
+                      href={getDashboardUrl()}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                    >
+                      Dashboard
+                    </a>
                     <span className="text-sm text-gray-600">
                       {getUserName()}
                     </span>
@@ -116,6 +129,12 @@ export default function PublicHeader() {
                 <>
                   {user ? (
                     <div className="pt-3 border-t border-gray-200 space-y-3">
+                      <a 
+                        href={getDashboardUrl()}
+                        className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-center font-medium"
+                      >
+                        Dashboard
+                      </a>
                       <div className="text-sm text-gray-600 py-2">
                         {getUserName()}
                       </div>
