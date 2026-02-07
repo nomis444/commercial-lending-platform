@@ -306,7 +306,7 @@ export default function Home() {
         </div>
 
         <Link 
-          href="/signup"
+          href="/investor-signup"
           className="bg-white text-primary-600 hover:bg-gray-100 font-bold py-4 px-10 rounded-lg text-xl inline-block shadow-lg"
         >
           Start Investing Today
