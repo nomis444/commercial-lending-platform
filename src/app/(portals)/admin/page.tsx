@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/utils/formatting'
 import DocumentsList from '@/components/DocumentsList'
+import { fundLoan } from '@/lib/loans/funding'
 
 interface Application {
   id: string
@@ -101,6 +102,79 @@ export default function AdminPortal() {
     } catch (error) {
       console.error('Error:', error)
       alert(`Failed to ${action} application`)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleFundLoan = async (applicationId: string, loanAmount: number) => {
+    setActionLoading(applicationId)
+    
+    try {
+      const supabase = createClient()
+      
+      // First, check if a loan record exists for this application
+      const { data: existingLoan, error: loanCheckError } = await supabase
+        .from('loans')
+        .select('id')
+        .eq('application_id', applicationId)
+        .single()
+      
+      let loanId = existingLoan?.id
+      
+      // If no loan exists, create one
+      if (!existingLoan) {
+        const { data: newLoan, error: createError } = await supabase
+          .from('loans')
+          .insert({
+            application_id: applicationId,
+            amount: loanAmount,
+            interest_rate: 0.25, // 25% APR - default rate
+            term_months: 12, // Default 12 month term
+            status: 'pending'
+          })
+          .select()
+          .single()
+        
+        if (createError) {
+          throw new Error(`Failed to create loan: ${createError.message}`)
+        }
+        
+        loanId = newLoan.id
+      }
+      
+      // Fund the loan (sets origination date and creates payment schedule)
+      const result = await fundLoan({
+        loanId: loanId!,
+        principalAmount: loanAmount,
+        interestRate: 0.25, // 25% APR
+        termMonths: 12 // 12 months
+      })
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fund loan')
+      }
+      
+      // Update application status to funded
+      const { error: updateError } = await supabase
+        .from('applications')
+        .update({ 
+          status: 'funded',
+          funding_status: 'fully_funded',
+          funded_amount: loanAmount
+        })
+        .eq('id', applicationId)
+      
+      if (updateError) {
+        throw new Error(`Failed to update application: ${updateError.message}`)
+      }
+      
+      alert(`Loan funded successfully! ${result.paymentsCreated} payment records created.`)
+      await fetchApplications()
+      
+    } catch (error) {
+      console.error('Error funding loan:', error)
+      alert(`Failed to fund loan: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setActionLoading(null)
     }
@@ -414,6 +488,15 @@ export default function AdminPortal() {
                         </button>
                       </>
                     )}
+                    {app.status === 'approved' && (
+                      <button
+                        onClick={() => handleFundLoan(app.id, app.loan_amount)}
+                        disabled={actionLoading === app.id}
+                        className="text-purple-600 hover:text-purple-900 disabled:opacity-50"
+                      >
+                        {actionLoading === app.id ? 'Funding...' : 'Fund Loan'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -499,6 +582,18 @@ export default function AdminPortal() {
                           Reject
                         </button>
                       </>
+                    )}
+                    {app.status === 'approved' && (
+                      <button
+                        onClick={() => {
+                          handleFundLoan(app.id, app.loan_amount)
+                          setSelectedLoan(null)
+                        }}
+                        disabled={actionLoading === app.id}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md disabled:opacity-50"
+                      >
+                        {actionLoading === app.id ? 'Funding...' : 'Fund Loan'}
+                      </button>
                     )}
                   </div>
                 </div>

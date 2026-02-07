@@ -201,7 +201,7 @@ The implementation will add profile management, payment account collection, loan
     - _Requirements: 2.9, 2.10_
 
 - [ ] 8. Loan funding trigger and payment schedule generation
-  - [ ] 8.1 Create loan funding service
+  - [-] 8.1 Create loan funding service
     - Create src/lib/loans/funding.ts
     - Implement fundLoan function that sets origination_date
     - Call amortization calculator to generate schedule
