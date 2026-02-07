@@ -91,23 +91,30 @@ export async function createInvestment(params: CreateInvestmentParams): Promise<
       throw new Error('Cannot create investment for another user')
     }
     
-    // Get application details
+    // Get application details - check if columns exist first
     const { data: application, error: appError } = await supabase
       .from('applications')
-      .select('loan_amount, status, funded_amount, funding_status')
+      .select('*')
       .eq('id', params.applicationId)
       .single()
     
-    if (appError || !application) {
+    if (appError) {
       console.error('Error fetching application:', appError)
-      throw new Error('Loan not found')
+      throw new Error(`Failed to fetch loan details: ${appError.message}. Please ensure the migration has been run.`)
     }
+    
+    if (!application) {
+      throw new Error('Loan not found - application does not exist')
+    }
+    
+    // Check if funded_amount column exists, if not default to 0
+    const fundedAmount = application.funded_amount !== undefined ? application.funded_amount : 0
     
     // Validate investment
     const validation = await validateInvestment(
       params.amount,
       application.loan_amount,
-      application.funded_amount || 0,
+      fundedAmount,
       application.status
     )
     
@@ -133,11 +140,11 @@ export async function createInvestment(params: CreateInvestmentParams): Promise<
     
     if (investError) {
       console.error('Error creating investment:', investError)
-      throw new Error('Failed to create investment')
+      throw new Error(`Failed to create investment: ${investError.message}`)
     }
     
     // Update application funding
-    const newFundedAmount = (application.funded_amount || 0) + params.amount
+    const newFundedAmount = fundedAmount + params.amount
     const newFundingPercentage = (newFundedAmount / application.loan_amount) * 100
     const newFundingStatus = newFundingPercentage >= 100 ? 'fully_funded' : 
                             newFundingPercentage > 0 ? 'partially_funded' : 'unfunded'
@@ -159,7 +166,7 @@ export async function createInvestment(params: CreateInvestmentParams): Promise<
         .from('application_investments')
         .delete()
         .eq('id', investment.id)
-      throw new Error('Failed to update loan funding')
+      throw new Error(`Failed to update loan funding: ${updateError.message}`)
     }
     
     return investment
