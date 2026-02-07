@@ -38,3 +38,35 @@ export function getRiskColor(risk: string): string {
     default: return 'text-gray-600 bg-gray-100'
   }
 }
+
+export function formatPercentage(rate: number): string {
+  return `${(rate * 100).toFixed(2)}%`
+}
+
+export function formatShortDate(date: Date): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).format(date)
+}
+
+export function formatLongDate(date: Date): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date)
+}
+
+export function maskAccountNumber(accountNumber: string): string {
+  if (!accountNumber || accountNumber.length <= 4) return '****'
+  const lastFour = accountNumber.slice(-4)
+  return `****${lastFour}`
+}
+
+export function maskRoutingNumber(routingNumber: string): string {
+  if (!routingNumber || routingNumber.length !== 9) return '****'
+  const lastFour = routingNumber.slice(-4)
+  return `****${lastFour}`
+}

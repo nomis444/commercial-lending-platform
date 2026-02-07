@@ -46,8 +46,8 @@ The implementation will add profile management, payment account collection, loan
     - Add RLS policy for audit_logs insert access
     - _Requirements: 8.2, 8.6_
 
-- [ ] 2. Core utility functions and services
-  - [ ] 2.1 Create validation utility functions
+- [-] 2. Core utility functions and services
+  - [x] 2.1 Create validation utility functions
     - Implement validateRoutingNumber (exactly 9 digits)
     - Implement validateAccountNumber (4-17 digits)
     - Implement validateEmail (email format)
@@ -67,7 +67,7 @@ The implementation will add profile management, payment account collection, loan
     - **Property 1: Profile Field Validation**
     - **Validates: Requirements 1.3, 1.4, 1.5, 1.6, 1.7**
   
-  - [ ] 2.5 Create formatting utility functions
+  - [x] 2.5 Create formatting utility functions
     - Implement formatCurrency (dollar sign, commas, 2 decimals)
     - Implement formatDate (human-readable format)
     - Implement formatShortDate (abbreviated format)
@@ -83,8 +83,8 @@ The implementation will add profile management, payment account collection, loan
     - **Property 21: Date Formatting**
     - **Validates: Requirements 3.4, 3.5, 4.2, 8.7, 9.5, 9.6**
 
-- [ ] 3. Amortization calculator service
-  - [ ] 3.1 Implement amortization calculator core functions
+- [-] 3. Amortization calculator service
+  - [x] 3.1 Implement amortization calculator core functions
     - Create src/lib/loans/amortization.ts
     - Implement calculateMonthlyPayment using standard formula
     - Implement calculatePaymentBreakdown (principal/interest split)
