@@ -28,10 +28,20 @@ export async function uploadDocument(
   try {
     const supabase = createClient()
     
+    // Verify user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      console.error('Authentication error:', authError)
+      alert('You must be logged in to upload documents')
+      return null
+    }
+    
     // Generate unique file path
     const timestamp = Date.now()
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const storagePath = `${applicationId}/${fieldName}_${timestamp}_${sanitizedFileName}`
+    
+    console.log('Uploading document:', { storagePath, fileSize: file.size, fileType: file.type })
     
     // Upload to storage
     const { data: storageData, error: storageError } = await supabase.storage
@@ -43,8 +53,11 @@ export async function uploadDocument(
     
     if (storageError) {
       console.error('Storage upload error:', storageError)
+      alert(`Storage upload failed: ${storageError.message}`)
       throw storageError
     }
+    
+    console.log('Storage upload successful:', storageData)
     
     // Create document record in database
     const { data: documentData, error: dbError } = await supabase
@@ -62,13 +75,15 @@ export async function uploadDocument(
     
     if (dbError) {
       console.error('Database insert error:', dbError)
+      alert(`Database error: ${dbError.message}. Please check that you have permission to upload documents for this application.`)
       // Try to clean up the uploaded file
       await supabase.storage.from('documents').remove([storagePath])
       throw dbError
     }
     
+    console.log('Document record created:', documentData)
     return documentData
-  } catch (error) {
+  } catch (error: any) {
     console.error('Document upload failed:', error)
     return null
   }
