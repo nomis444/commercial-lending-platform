@@ -470,7 +470,7 @@ export default function AdminPortal() {
                     >
                       View
                     </button>
-                    {app.status === 'submitted' && (
+                    {(app.status === 'submitted' || app.status === 'under_review') && (
                       <>
                         <button
                           onClick={() => handleLoanAction(app.id, 'approve')}
@@ -559,7 +559,7 @@ export default function AdminPortal() {
                     >
                       Close
                     </button>
-                    {app.status === 'submitted' && (
+                    {(app.status === 'submitted' || app.status === 'under_review') && (
                       <>
                         <button
                           onClick={() => {

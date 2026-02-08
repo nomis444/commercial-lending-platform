@@ -131,7 +131,7 @@ USING (
     SELECT 1 FROM loans l
     JOIN applications a ON l.application_id = a.id
     WHERE l.id = loan_payments.loan_id
-    AND a.applicant_id = auth.uid()
+    AND (a.user_id = auth.uid() OR a.applicant_id = auth.uid())
   ) OR
   (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
