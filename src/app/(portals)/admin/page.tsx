@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { formatCurrency, formatDate, getStatusColor, getRiskColor } from '@/lib/utils/formatting'
+import { formatCurrency, formatDate, getStatusColor, getRiskColor, formatPercentage, formatShortDate } from '@/lib/utils/formatting'
 import DocumentsList from '@/components/DocumentsList'
 import { fundLoan } from '@/lib/loans/funding'
 
@@ -13,13 +13,42 @@ interface Application {
   loan_purpose: string
   business_info: any
   financial_info: any
+  contact_info: any
   created_at: string
+}
+
+interface Loan {
+  id: string
+  application_id: string
+  principal_amount: number
+  interest_rate: number
+  term_months: number
+  monthly_payment: number
+  total_amount: number
+  status: string
+  origination_date: string | null
+  created_at: string
+}
+
+interface PaymentRecord {
+  id: string
+  loan_id: string
+  payment_number: number
+  due_date: string
+  amount: number
+  principal_portion: number
+  interest_portion: number
+  remaining_balance: number
+  status: string
+  paid_date: string | null
 }
 
 export default function AdminPortal() {
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedLoan, setSelectedLoan] = useState<string | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
+  const [loans, setLoans] = useState<Loan[]>([])
+  const [payments, setPayments] = useState<PaymentRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
@@ -59,6 +88,33 @@ export default function AdminPortal() {
         console.error('Error fetching applications:', error)
       } else {
         setApplications(data || [])
+        
+        // Fetch loans for funded applications
+        const fundedAppIds = (data || []).filter(app => app.status === 'funded' || app.status === 'active').map(app => app.id)
+        if (fundedAppIds.length > 0) {
+          const { data: loansData } = await supabase
+            .from('loans')
+            .select('*')
+            .in('application_id', fundedAppIds)
+          
+          if (loansData) {
+            setLoans(loansData)
+            
+            // Fetch payment schedules for all loans
+            const loanIds = loansData.map(loan => loan.id)
+            if (loanIds.length > 0) {
+              const { data: paymentsData } = await supabase
+                .from('loan_payments')
+                .select('*')
+                .in('loan_id', loanIds)
+                .order('payment_number', { ascending: true })
+              
+              if (paymentsData) {
+                setPayments(paymentsData)
+              }
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error:', error)
@@ -177,6 +233,38 @@ export default function AdminPortal() {
       alert(`Failed to fund loan: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setActionLoading(null)
+    }
+  }
+
+  function getLoanForApplication(applicationId: string): Loan | undefined {
+    return loans.find(loan => loan.application_id === applicationId)
+  }
+
+  function getPaymentsForLoan(loanId: string): PaymentRecord[] {
+    return payments.filter(payment => payment.loan_id === loanId)
+  }
+
+  async function handlePaymentStatusUpdate(paymentId: string, newStatus: 'paid' | 'late' | 'missed') {
+    const supabase = createClient()
+    
+    try {
+      const updateData: any = { status: newStatus }
+      if (newStatus === 'paid') {
+        updateData.paid_date = new Date().toISOString()
+      }
+      
+      const { error } = await supabase
+        .from('loan_payments')
+        .update(updateData)
+        .eq('id', paymentId)
+      
+      if (error) throw error
+      
+      await fetchApplications()
+      alert(`Payment marked as ${newStatus}`)
+    } catch (error) {
+      console.error('Error updating payment:', error)
+      alert('Failed to update payment status')
     }
   }
 
@@ -507,8 +595,8 @@ export default function AdminPortal() {
       {/* Loan Details Modal */}
       {selectedLoan && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pb-4 border-b">
               <h3 className="text-xl font-bold text-gray-900">Loan Details</h3>
               <button
                 onClick={() => setSelectedLoan(null)}
@@ -522,16 +610,32 @@ export default function AdminPortal() {
             {(() => {
               const app = applications.find(a => a.id === selectedLoan)
               if (!app) return null
+              const loan = getLoanForApplication(app.id)
+              const loanPayments = loan ? getPaymentsForLoan(loan.id) : []
+              const isFunded = loan && loan.origination_date !== null
+              
               return (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
+                  {/* Contact & Business Info */}
+                  <div className="grid grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-3">Contact Information</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <div><strong className="text-gray-900">Name:</strong> {app.contact_info?.firstName || ''} {app.contact_info?.lastName || 'N/A'}</div>
+                        <div><strong className="text-gray-900">Email:</strong> {app.contact_info?.email || 'N/A'}</div>
+                        <div><strong className="text-gray-900">Phone:</strong> {app.contact_info?.phone || 'N/A'}</div>
+                        <div><strong className="text-gray-900">Address:</strong> {app.contact_info?.address || 'N/A'}</div>
+                        <div><strong className="text-gray-900">City:</strong> {app.contact_info?.city || 'N/A'}, {app.contact_info?.state || 'N/A'} {app.contact_info?.zipCode || ''}</div>
+                      </div>
+                    </div>
                     <div>
                       <h4 className="text-lg font-bold text-gray-900 mb-3">Business Information</h4>
                       <div className="space-y-2 text-sm text-gray-700">
                         <div><strong className="text-gray-900">Name:</strong> {app.business_info?.businessName || 'N/A'}</div>
                         <div><strong className="text-gray-900">Industry:</strong> {app.business_info?.industry || 'N/A'}</div>
-                        <div><strong className="text-gray-900">Annual Revenue:</strong> {formatCurrency(app.financial_info?.annualRevenue || 0)}</div>
                         <div><strong className="text-gray-900">Years in Business:</strong> {app.business_info?.yearsInBusiness || 'N/A'}</div>
+                        <div><strong className="text-gray-900">Annual Revenue:</strong> {formatCurrency(app.financial_info?.annualRevenue || 0)}</div>
+                        <div><strong className="text-gray-900">Monthly Revenue:</strong> {formatCurrency(app.financial_info?.monthlyRevenue || 0)}</div>
                       </div>
                     </div>
                     <div>
@@ -541,10 +645,102 @@ export default function AdminPortal() {
                         <div><strong className="text-gray-900">Purpose:</strong> {app.loan_purpose || 'N/A'}</div>
                         <div><strong className="text-gray-900">Status:</strong> <span className={`px-2 py-1 rounded text-xs ${getStatusColor(app.status)}`}>{app.status.replace('_', ' ').toUpperCase()}</span></div>
                         <div><strong className="text-gray-900">Applied:</strong> {formatDate(app.created_at)}</div>
+                        <div><strong className="text-gray-900">Monthly Expenses:</strong> {formatCurrency(app.financial_info?.monthlyExpenses || 0)}</div>
                       </div>
                     </div>
                   </div>
-                  <div>
+
+                  {/* Funded Loan Details */}
+                  {isFunded && loan && (
+                    <div className="border-t pt-6">
+                      <h4 className="text-lg font-bold text-gray-900 mb-4">Funded Loan Information</h4>
+                      <div className="grid grid-cols-4 gap-4 mb-6 p-4 bg-blue-50 rounded-lg">
+                        <div>
+                          <p className="text-xs text-blue-700">Principal Amount</p>
+                          <p className="text-lg font-bold text-blue-900">{formatCurrency(loan.principal_amount)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-blue-700">Interest Rate (APR)</p>
+                          <p className="text-lg font-bold text-blue-900">{formatPercentage(loan.interest_rate)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-blue-700">Monthly Payment</p>
+                          <p className="text-lg font-bold text-blue-900">{formatCurrency(loan.monthly_payment)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-blue-700">Origination Date</p>
+                          <p className="text-lg font-bold text-blue-900">{loan.origination_date ? formatShortDate(new Date(loan.origination_date)) : 'N/A'}</p>
+                        </div>
+                      </div>
+
+                      {/* Payment Schedule */}
+                      {loanPayments.length > 0 && (
+                        <div>
+                          <h5 className="text-md font-bold text-gray-900 mb-3">Payment Schedule</h5>
+                          <div className="overflow-x-auto max-h-96 overflow-y-auto border rounded-lg">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50 sticky top-0">
+                                <tr>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Principal</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Interest</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {loanPayments.map((payment) => (
+                                  <tr key={payment.id} className={payment.status === 'paid' ? 'bg-green-50' : payment.status === 'late' ? 'bg-red-50' : ''}>
+                                    <td className="px-4 py-2 text-sm font-medium text-gray-900">{payment.payment_number}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{formatShortDate(new Date(payment.due_date))}</td>
+                                    <td className="px-4 py-2 text-sm font-medium text-gray-900">{formatCurrency(payment.amount)}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-600">{formatCurrency(payment.principal_portion)}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-600">{formatCurrency(payment.interest_portion)}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{formatCurrency(payment.remaining_balance)}</td>
+                                    <td className="px-4 py-2">
+                                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        payment.status === 'paid' ? 'bg-green-100 text-green-800' :
+                                        payment.status === 'late' ? 'bg-red-100 text-red-800' :
+                                        payment.status === 'missed' ? 'bg-red-100 text-red-800' :
+                                        'bg-gray-100 text-gray-800'
+                                      }`}>
+                                        {payment.status.toUpperCase()}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-2 text-sm">
+                                      {payment.status === 'pending' && (
+                                        <div className="flex space-x-1">
+                                          <button
+                                            onClick={() => handlePaymentStatusUpdate(payment.id, 'paid')}
+                                            className="text-green-600 hover:text-green-900 text-xs"
+                                          >
+                                            Mark Paid
+                                          </button>
+                                          <span className="text-gray-300">|</span>
+                                          <button
+                                            onClick={() => handlePaymentStatusUpdate(payment.id, 'late')}
+                                            className="text-yellow-600 hover:text-yellow-900 text-xs"
+                                          >
+                                            Late
+                                          </button>
+                                        </div>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Documents */}
+                  <div className="border-t pt-6">
                     <h4 className="text-lg font-bold text-gray-900 mb-3">Documents</h4>
                     <DocumentsList 
                       applicationId={app.id} 
@@ -552,7 +748,9 @@ export default function AdminPortal() {
                       canUpload={false}
                     />
                   </div>
-                  <div className="flex justify-end space-x-3 pt-4 border-t">
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end space-x-3 pt-4 border-t sticky bottom-0 bg-white">
                     <button
                       onClick={() => setSelectedLoan(null)}
                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
