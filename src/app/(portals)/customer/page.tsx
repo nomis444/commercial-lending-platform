@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils/formatting'
+import { formatCurrency, formatDate, getStatusColor, formatPercentage, formatShortDate } from '@/lib/utils/formatting'
 import { LOAN_PRODUCTS, type LoanProductType } from '@/lib/application/products'
 import type { User } from '@supabase/supabase-js'
 import DocumentsList from '@/components/DocumentsList'
@@ -20,6 +20,32 @@ interface Application {
   created_at: string
 }
 
+interface Loan {
+  id: string
+  application_id: string
+  amount: number
+  interest_rate: number
+  term_months: number
+  monthly_payment: number
+  total_amount: number
+  status: string
+  origination_date: string | null
+  created_at: string
+}
+
+interface PaymentRecord {
+  id: string
+  loan_id: string
+  payment_number: number
+  due_date: string
+  amount: number
+  principal_portion: number
+  interest_portion: number
+  remaining_balance: number
+  status: string
+  paid_date: string | null
+}
+
 interface Document {
   id: string
   application_id: string
@@ -33,11 +59,14 @@ interface Document {
 export default function CustomerPortal() {
   const [activeTab, setActiveTab] = useState('overview')
   const [applications, setApplications] = useState<Application[]>([])
+  const [loans, setLoans] = useState<Loan[]>([])
+  const [payments, setPayments] = useState<PaymentRecord[]>([])
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [selectedLoanId, setSelectedLoanId] = useState<string | null>(null)
 
   useEffect(() => {
     checkUserAndFetchData()
@@ -75,6 +104,33 @@ export default function CustomerPortal() {
 
     if (!error && data) {
       setApplications(data)
+      
+      // Fetch loans for funded applications
+      const fundedAppIds = data.filter(app => app.status === 'funded' || app.status === 'active').map(app => app.id)
+      if (fundedAppIds.length > 0) {
+        const { data: loansData } = await supabase
+          .from('loans')
+          .select('*')
+          .in('application_id', fundedAppIds)
+        
+        if (loansData) {
+          setLoans(loansData)
+          
+          // Fetch payment schedules for all loans
+          const loanIds = loansData.map(loan => loan.id)
+          if (loanIds.length > 0) {
+            const { data: paymentsData } = await supabase
+              .from('loan_payments')
+              .select('*')
+              .in('loan_id', loanIds)
+              .order('payment_number', { ascending: true })
+            
+            if (paymentsData) {
+              setPayments(paymentsData)
+            }
+          }
+        }
+      }
     }
     
     // Fetch documents for all applications
@@ -100,6 +156,27 @@ export default function CustomerPortal() {
       return LOAN_PRODUCTS[productType].name
     }
     return 'Business Loan'
+  }
+
+  function getLoanForApplication(applicationId: string): Loan | undefined {
+    return loans.find(loan => loan.application_id === applicationId)
+  }
+
+  function getPaymentsForLoan(loanId: string): PaymentRecord[] {
+    return payments.filter(payment => payment.loan_id === loanId)
+  }
+
+  function calculateNextPayment(loanId: string): PaymentRecord | null {
+    const loanPayments = getPaymentsForLoan(loanId)
+    return loanPayments.find(p => p.status === 'pending') || null
+  }
+
+  function calculateDaysUntilDue(dueDate: string): number {
+    const due = new Date(dueDate)
+    const now = new Date()
+    const diffTime = due.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
   }
 
   async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>, applicationId?: string) {
@@ -361,6 +438,9 @@ export default function CustomerPortal() {
         ) : (
           applications.map((app) => {
             const appDocs = documents.filter(doc => doc.application_id === app.id)
+            const loan = getLoanForApplication(app.id)
+            const isFunded = loan && loan.origination_date !== null
+            
             return (
               <div key={app.id} className="bg-white rounded-lg shadow-sm border">
                 <div className="p-6">
@@ -406,6 +486,42 @@ export default function CustomerPortal() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Loan Details for Funded Loans */}
+                  {isFunded && loan && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <h4 className="text-sm font-bold text-blue-900 mb-3">Loan Details</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <p className="text-xs text-blue-700">Interest Rate</p>
+                          <p className="text-lg font-bold text-blue-900">{formatPercentage(loan.interest_rate)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-blue-700">Monthly Payment</p>
+                          <p className="text-lg font-bold text-blue-900">{formatCurrency(loan.monthly_payment)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-blue-700">Total Amount</p>
+                          <p className="text-lg font-bold text-blue-900">{formatCurrency(loan.total_amount)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-blue-700">Origination Date</p>
+                          <p className="text-lg font-bold text-blue-900">
+                            {loan.origination_date ? formatShortDate(new Date(loan.origination_date)) : 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedLoanId(loan.id)
+                          setActiveTab('payments')
+                        }}
+                        className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View Payment Schedule →
+                      </button>
+                    </div>
+                  )}
 
                   {/* Documents section */}
                   {appDocs.length > 0 && (
@@ -498,19 +614,218 @@ export default function CustomerPortal() {
     </div>
   )
 
-  const renderPayments = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Payment Management</h2>
+  const renderPayments = () => {
+    const fundedLoans = loans.filter(loan => loan.origination_date !== null)
+    
+    if (fundedLoans.length === 0) {
+      return (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-gray-900">Loan Details & Payments</h2>
 
-      <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
-        <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-        </svg>
-        <p className="text-gray-500">No active loans requiring payments</p>
-        <p className="text-sm text-gray-400 mt-2">Payment information will appear here once your loan is funded</p>
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
+            <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+            </svg>
+            <p className="text-gray-500">No active loans requiring payments</p>
+            <p className="text-sm text-gray-400 mt-2">Payment information will appear here once your loan is funded</p>
+          </div>
+        </div>
+      )
+    }
+
+    const selectedLoan = selectedLoanId ? fundedLoans.find(l => l.id === selectedLoanId) : fundedLoans[0]
+    const loanPayments = selectedLoan ? getPaymentsForLoan(selectedLoan.id) : []
+    const nextPayment = selectedLoan ? calculateNextPayment(selectedLoan.id) : null
+    const paidPayments = loanPayments.filter(p => p.status === 'paid')
+    const totalPaid = paidPayments.reduce((sum, p) => sum + p.amount, 0)
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">Loan Details & Payments</h2>
+          {fundedLoans.length > 1 && (
+            <select
+              value={selectedLoan?.id || ''}
+              onChange={(e) => setSelectedLoanId(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            >
+              {fundedLoans.map((loan) => {
+                const app = applications.find(a => a.id === loan.application_id)
+                return (
+                  <option key={loan.id} value={loan.id}>
+                    {app?.business_info?.businessName || 'Loan'} - {formatCurrency(loan.amount)}
+                  </option>
+                )
+              })}
+            </select>
+          )}
+        </div>
+
+        {selectedLoan && (
+          <>
+            {/* Loan Details Card */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Loan Information</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div>
+                  <p className="text-sm text-gray-600">Principal Amount</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(selectedLoan.amount)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Interest Rate (APR)</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatPercentage(selectedLoan.interest_rate)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Loan Term</p>
+                  <p className="text-2xl font-bold text-gray-900">{selectedLoan.term_months} months</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Monthly Payment</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(selectedLoan.monthly_payment)}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6 pt-6 border-t">
+                <div>
+                  <p className="text-sm text-gray-600">Total Amount</p>
+                  <p className="text-lg font-bold text-gray-900">{formatCurrency(selectedLoan.total_amount)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Origination Date</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {selectedLoan.origination_date ? formatShortDate(new Date(selectedLoan.origination_date)) : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">First Payment Due</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {loanPayments[0] ? formatShortDate(new Date(loanPayments[0].due_date)) : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Final Payment Due</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {loanPayments[loanPayments.length - 1] ? formatShortDate(new Date(loanPayments[loanPayments.length - 1].due_date)) : 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Status Card */}
+            {nextPayment && (
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Next Payment Due</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div>
+                    <p className="text-sm text-gray-700">Due Date</p>
+                    <p className="text-2xl font-bold text-blue-900">{formatShortDate(new Date(nextPayment.due_date))}</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {calculateDaysUntilDue(nextPayment.due_date)} days remaining
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-700">Payment Amount</p>
+                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(nextPayment.amount)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-700">Total Paid to Date</p>
+                    <p className="text-2xl font-bold text-green-900">{formatCurrency(totalPaid)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-700">Remaining Balance</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {formatCurrency(paidPayments.length > 0 ? paidPayments[paidPayments.length - 1].remaining_balance : selectedLoan.amount)}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="flex justify-between text-sm text-gray-700 mb-2">
+                    <span>Payment Progress</span>
+                    <span>{paidPayments.length} of {loanPayments.length} payments made</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-blue-600 h-3 rounded-full transition-all duration-300" 
+                      style={{ width: `${(paidPayments.length / loanPayments.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Schedule Table */}
+            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-xl font-bold text-gray-900">Payment Schedule</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Payment #
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Due Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Principal
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Interest
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Balance
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {loanPayments.map((payment) => (
+                      <tr key={payment.id} className={payment.status === 'paid' ? 'bg-green-50' : ''}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {payment.payment_number}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatShortDate(new Date(payment.due_date))}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {formatCurrency(payment.amount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {formatCurrency(payment.principal_portion)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {formatCurrency(payment.interest_portion)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatCurrency(payment.remaining_balance)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            payment.status === 'paid' ? 'bg-green-100 text-green-800' :
+                            payment.status === 'late' ? 'bg-red-100 text-red-800' :
+                            payment.status === 'missed' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {payment.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
