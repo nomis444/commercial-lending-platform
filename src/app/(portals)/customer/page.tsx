@@ -23,7 +23,7 @@ interface Application {
 interface Loan {
   id: string
   application_id: string
-  amount: number
+  principal_amount: number
   interest_rate: number
   term_months: number
   monthly_payment: number
@@ -653,7 +653,7 @@ export default function CustomerPortal() {
                 const app = applications.find(a => a.id === loan.application_id)
                 return (
                   <option key={loan.id} value={loan.id}>
-                    {app?.business_info?.businessName || 'Loan'} - {formatCurrency(loan.amount)}
+                    {app?.business_info?.businessName || 'Loan'} - {formatCurrency(loan.principal_amount)}
                   </option>
                 )
               })}
@@ -669,7 +669,7 @@ export default function CustomerPortal() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div>
                   <p className="text-sm text-gray-600">Principal Amount</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(selectedLoan.amount)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(selectedLoan.principal_amount)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Interest Rate (APR)</p>
@@ -733,7 +733,7 @@ export default function CustomerPortal() {
                   <div>
                     <p className="text-sm text-gray-700">Remaining Balance</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(paidPayments.length > 0 ? paidPayments[paidPayments.length - 1].remaining_balance : selectedLoan.amount)}
+                      {formatCurrency(paidPayments.length > 0 ? paidPayments[paidPayments.length - 1].remaining_balance : selectedLoan.principal_amount)}
                     </p>
                   </div>
                 </div>

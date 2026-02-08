@@ -128,7 +128,7 @@ export default function AdminPortal() {
           .from('loans')
           .insert({
             application_id: applicationId,
-            amount: loanAmount,
+            principal_amount: loanAmount,
             interest_rate: 0.25, // 25% APR - default rate
             term_months: 12, // Default 12 month term
             status: 'pending'
