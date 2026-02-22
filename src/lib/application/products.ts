@@ -1,4 +1,4 @@
-// Loan Product Definitions and Calculations
+// Revenue Advance Product Definitions and Calculations
 
 export type LoanProductType = 'instant' | 'standard' | 'premium'
 
@@ -16,7 +16,7 @@ export interface LoanProduct {
 export const LOAN_PRODUCTS: Record<LoanProductType, LoanProduct> = {
   instant: {
     id: 'instant',
-    name: 'Instant Approval',
+    name: 'Instant Revenue Advance',
     minAmount: 5000,
     maxAmount: 8000,
     baseRate: 0.25, // 25% APR
@@ -25,19 +25,21 @@ export const LOAN_PRODUCTS: Record<LoanProductType, LoanProduct> = {
     features: [
       'Instant approval decision',
       'Minimal documentation',
-      'Funding in 24-48 hours',
+      'Same-day funding',
+      'No collateral required',
       'Starting at 25% APR'
     ]
   },
   standard: {
     id: 'standard',
-    name: 'Standard Business',
+    name: 'Standard Revenue Advance',
     minAmount: 10000,
     maxAmount: 50000,
     baseRate: 0.25, // 25% APR
     termOptions: [12, 24, 36, 48],
     requiredSteps: ['welcome', 'business_info', 'loan_details', 'financial_info', 'banking_info', 'documents', 'review', 'create_account'],
     features: [
+      'Same-day to 48-hour funding',
       'Competitive rates',
       'Flexible repayment terms',
       'Full application review',
@@ -46,14 +48,15 @@ export const LOAN_PRODUCTS: Record<LoanProductType, LoanProduct> = {
   },
   premium: {
     id: 'premium',
-    name: 'Premium Business',
+    name: 'Premium Revenue Advance',
     minAmount: 55000,
     maxAmount: 200000,
     baseRate: 0.25, // 25% APR
     termOptions: [12, 24, 36, 48, 60],
     requiredSteps: ['welcome', 'business_info', 'loan_details', 'financial_info', 'banking_info', 'documents', 'review', 'create_account'],
     features: [
-      'Largest loan amounts',
+      'Same-day to 48-hour funding',
+      'Largest funding amounts',
       'Extended repayment options',
       'Dedicated account manager',
       'Starting at 25% APR'

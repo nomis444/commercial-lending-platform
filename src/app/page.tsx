@@ -2,195 +2,243 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-charcoal-900">
       {/* Hero Section */}
-      <div className="text-center mb-16">
-        <h1 className="text-5xl font-bold text-gray-900 mb-6">
-          Commercial Lending Made Simple
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-          Connect borrowers with investors through our transparent, easy-to-use platform. 
-          Experience the future of commercial lending with real-time tracking and streamlined processes.
-        </p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-charcoal-900 via-charcoal-800 to-charcoal-900">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,107,53,0.1),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(139,92,246,0.1),transparent_50%)]"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+          <div className="text-center">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+              Revenue Advances
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-electric-500">
+                Built for Speed
+              </span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto">
+              Get the funding your business needs in hours, not weeks. No collateral. No complexity. Just fast, transparent capital.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link 
+                href="/apply"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg"
+              >
+                Get Funded Now
+              </Link>
+              <a 
+                href="#products"
+                className="bg-charcoal-800 hover:bg-charcoal-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all border border-gray-700"
+              >
+                View Products
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Loan Products Section */}
-      <div className="mb-16">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Loan Product
+      {/* Stats Section */}
+      <div className="bg-charcoal-800 border-y border-charcoal-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold text-electric-500 mb-2">$5K - $200K</div>
+              <div className="text-gray-400">Funding Range</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-orange-500 mb-2">Same Day</div>
+              <div className="text-gray-400">Funding Available</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-purple-500 mb-2">25% APR</div>
+              <div className="text-gray-400">Starting Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Products Section */}
+      <div id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+            Choose Your Funding
           </h2>
-          <p className="text-xl text-gray-600">
-            Flexible financing options designed for your business needs
+          <p className="text-xl text-gray-400">
+            Flexible options designed for businesses at every stage
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Instant Approval Loan */}
-          <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 hover:border-blue-500 transition-all">
+          {/* Instant Revenue Advance */}
+          <div className="bg-charcoal-800 rounded-2xl border-2 border-charcoal-700 hover:border-electric-500 transition-all duration-300 overflow-hidden group">
+            <div className="h-2 bg-gradient-to-r from-electric-500 to-electric-600"></div>
             <div className="p-8">
               <div className="text-center mb-6">
-                <div className="inline-block p-3 bg-green-100 rounded-full mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-electric-500/10 rounded-xl mb-4 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-electric-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Instant Approval</h3>
-                <div className="text-4xl font-bold text-green-600 mb-2">$5K - $8K</div>
-                <p className="text-gray-600">Fast funding for immediate needs</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Instant</h3>
+                <div className="text-4xl font-bold text-electric-500 mb-2">$5K - $8K</div>
+                <p className="text-gray-400">Lightning-fast approval</p>
               </div>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <div className="space-y-3 mb-8">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-electric-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Instant approval decision</span>
+                  <span>Instant approval decision</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-electric-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Minimal documentation</span>
+                  <span>Minimal documentation</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-electric-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Same-day funding</span>
+                  <span>Same-day funding</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-electric-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">No collateral required</span>
+                  <span>No collateral required</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-electric-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Starting at 25% APR</span>
+                  <span>Starting at 25% APR</span>
                 </div>
               </div>
 
               <Link 
                 href="/apply?product=instant"
-                className="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-center"
+                className="block w-full bg-electric-500 hover:bg-electric-600 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
               >
                 Apply Now
               </Link>
             </div>
           </div>
 
-          {/* Standard Business Loan */}
-          <div className="bg-white rounded-lg shadow-lg border-2 border-blue-500 hover:border-blue-600 transition-all relative">
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold">MOST POPULAR</span>
+          {/* Standard Revenue Advance - MOST POPULAR */}
+          <div className="bg-charcoal-800 rounded-2xl border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 overflow-hidden group relative transform md:scale-105">
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+              <span className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                MOST POPULAR
+              </span>
             </div>
+            <div className="h-2 bg-gradient-to-r from-orange-500 to-orange-600"></div>
             <div className="p-8">
               <div className="text-center mb-6">
-                <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500/10 rounded-xl mb-4 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Standard Business</h3>
-                <div className="text-4xl font-bold text-blue-600 mb-2">$10K - $50K</div>
-                <p className="text-gray-600">Perfect for growing businesses</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Standard</h3>
+                <div className="text-4xl font-bold text-orange-500 mb-2">$10K - $50K</div>
+                <p className="text-gray-400">Perfect for growing businesses</p>
               </div>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <div className="space-y-3 mb-8">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Same-day to 48-hour funding</span>
+                  <span>Same-day to 48-hour funding</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Competitive rates</span>
+                  <span>Competitive rates</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Flexible repayment terms</span>
+                  <span>Flexible repayment terms</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Full application review</span>
+                  <span>Full application review</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Starting at 25% APR</span>
+                  <span>Starting at 25% APR</span>
                 </div>
               </div>
 
               <Link 
                 href="/apply?product=standard"
-                className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-center"
+                className="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
               >
                 Apply Now
               </Link>
             </div>
           </div>
 
-          {/* Premium Business Loan */}
-          <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 hover:border-purple-500 transition-all">
+          {/* Premium Revenue Advance */}
+          <div className="bg-charcoal-800 rounded-2xl border-2 border-charcoal-700 hover:border-purple-500 transition-all duration-300 overflow-hidden group">
+            <div className="h-2 bg-gradient-to-r from-purple-500 to-purple-600"></div>
             <div className="p-8">
               <div className="text-center mb-6">
-                <div className="inline-block p-3 bg-purple-100 rounded-full mb-4">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-500/10 rounded-xl mb-4 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Business</h3>
-                <div className="text-4xl font-bold text-purple-600 mb-2">$55K - $200K</div>
-                <p className="text-gray-600">For established enterprises</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Premium</h3>
+                <div className="text-4xl font-bold text-purple-500 mb-2">$55K - $200K</div>
+                <p className="text-gray-400">For established enterprises</p>
               </div>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <div className="space-y-3 mb-8">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Same-day to 48-hour funding</span>
+                  <span>Same-day to 48-hour funding</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Largest loan amounts</span>
+                  <span>Largest funding amounts</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Extended repayment options</span>
+                  <span>Extended repayment options</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Dedicated account manager</span>
+                  <span>Dedicated account manager</span>
                 </div>
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-start text-gray-300">
+                  <svg className="w-5 h-5 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-700">Starting at 25% APR</span>
+                  <span>Starting at 25% APR</span>
                 </div>
               </div>
 
               <Link 
                 href="/apply?product=premium"
-                className="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-center"
+                className="block w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
               >
                 Apply Now
               </Link>
@@ -199,118 +247,84 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      {/* Features Section */}
+      <div className="bg-charcoal-800 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Why Choose MidPoint Access
+            </h2>
+            <p className="text-xl text-gray-400">
+              Fast, transparent, and built for modern businesses
+            </p>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            For Borrowers
-          </h3>
-          <p className="text-gray-600">
-            Simple application process with transparent terms and real-time tracking
-          </p>
-        </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            For Investors
-          </h3>
-          <p className="text-gray-600">
-            Access vetted loan opportunities with detailed performance analytics
-          </p>
-        </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-charcoal-900 rounded-xl p-8 border border-charcoal-700 hover:border-orange-500 transition-colors">
+              <div className="w-14 h-14 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Lightning Fast
+              </h3>
+              <p className="text-gray-400 leading-relaxed">
+                Get approved in minutes and funded the same day. No waiting weeks for traditional bank approvals.
+              </p>
+            </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Transparency
-          </h3>
-          <p className="text-gray-600">
-            Full visibility into the lending process from application to funding
-          </p>
-        </div>
+            <div className="bg-charcoal-900 rounded-xl p-8 border border-charcoal-700 hover:border-electric-500 transition-colors">
+              <div className="w-14 h-14 bg-electric-500/10 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-7 h-7 text-electric-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Fully Transparent
+              </h3>
+              <p className="text-gray-400 leading-relaxed">
+                No hidden fees or surprises. See exactly what you'll pay before you commit with our upfront pricing.
+              </p>
+            </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <div className="bg-charcoal-900 rounded-xl p-8 border border-charcoal-700 hover:border-purple-500 transition-colors">
+              <div className="w-14 h-14 bg-purple-500/10 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Simple & Secure
+              </h3>
+              <p className="text-gray-400 leading-relaxed">
+                Bank-level security with a simple application process. Track everything in real-time from your dashboard.
+              </p>
+            </div>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Technology
-          </h3>
-          <p className="text-gray-600">
-            Modern platform built for speed, security, and scalability
-          </p>
         </div>
       </div>
 
-      {/* Investor CTA Section */}
-      <div className="bg-primary-600 rounded-lg p-12 text-center text-white">
-        <h2 className="text-4xl font-bold mb-4">
-          Become an Investor
-        </h2>
-        <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-          Join our platform and start earning competitive returns by funding vetted commercial loans
-        </p>
-        
-        <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-4xl mx-auto">
-          <div className="bg-white bg-opacity-10 rounded-lg p-6">
-            <div className="text-3xl font-bold mb-2">8-12%</div>
-            <div className="text-sm opacity-90">Target Annual Returns</div>
-          </div>
-          <div className="bg-white bg-opacity-10 rounded-lg p-6">
-            <div className="text-3xl font-bold mb-2">100%</div>
-            <div className="text-sm opacity-90">Transparent Process</div>
-          </div>
-          <div className="bg-white bg-opacity-10 rounded-lg p-6">
-            <div className="text-3xl font-bold mb-2">24/7</div>
-            <div className="text-sm opacity-90">Portfolio Monitoring</div>
+      {/* CTA Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="bg-gradient-to-r from-orange-500 to-purple-500 rounded-2xl p-12 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjEiLz48L2c+PC9zdmc+')] opacity-20"></div>
+          <div className="relative">
+            <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+              Ready to Get Started?
+            </h2>
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+              Join thousands of businesses that have accelerated their growth with MidPoint Access
+            </p>
+            <Link 
+              href="/apply"
+              className="inline-block bg-white text-orange-600 hover:bg-gray-100 font-bold py-4 px-10 rounded-lg text-xl transition-all transform hover:scale-105 shadow-xl"
+            >
+              Apply in Minutes
+            </Link>
           </div>
         </div>
-
-        <div className="space-y-3 mb-8 max-w-2xl mx-auto text-left">
-          <div className="flex items-start">
-            <svg className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span>Access pre-vetted commercial loan opportunities with detailed business financials</span>
-          </div>
-          <div className="flex items-start">
-            <svg className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span>Diversify your portfolio across multiple loans to minimize risk</span>
-          </div>
-          <div className="flex items-start">
-            <svg className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span>Real-time tracking of your investments with automated monthly payments</span>
-          </div>
-        </div>
-
-        <Link 
-          href="/investor-signup"
-          className="bg-white text-primary-600 hover:bg-gray-100 font-bold py-4 px-10 rounded-lg text-xl inline-block shadow-lg"
-        >
-          Start Investing Today
-        </Link>
       </div>
     </div>
   )

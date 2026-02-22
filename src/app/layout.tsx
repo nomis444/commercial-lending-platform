@@ -6,8 +6,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Commercial Lending Platform',
-  description: 'Transparent and easy commercial lending platform connecting borrowers with investors',
+  title: 'MidPoint Access',
+  description: 'Transparent revenue advance platform connecting businesses with investors',
 }
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-charcoal-900">
           <PublicHeader />
           <main>{children}</main>
         </div>
