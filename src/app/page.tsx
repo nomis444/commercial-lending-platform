@@ -12,7 +12,7 @@ export default function Home() {
           <div className="text-center">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               Revenue Advances
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-electric-500">
+              <span className="block text-electric-500 italic" style={{ fontStyle: 'italic', transform: 'skewX(-10deg)' }}>
                 Built for Speed
               </span>
             </h1>
