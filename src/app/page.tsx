@@ -5,9 +5,6 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-[#111111] to-[#262727]">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,107,53,0.1),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(139,92,246,0.1),transparent_50%)]"></div>
-        
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           <div className="text-center">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
@@ -66,11 +63,11 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 mt-6">
           {/* Instant Revenue Advance */}
           <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-charcoal-700 hover:border-electric-500 transition-all duration-300 overflow-hidden group shadow-xl hover:shadow-2xl hover:shadow-electric-500/20 transform hover:-translate-y-1">
             <div className="h-2 bg-gradient-to-r from-electric-500 to-electric-600"></div>
-            <div className="p-8">
+            <div className="pt-10 px-8 pb-8">
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-electric-500/10 rounded-xl mb-4 group-hover:scale-110 transition-transform">
                   <svg className="w-8 h-8 text-electric-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +129,7 @@ export default function Home() {
               </span>
             </div>
             <div className="h-2 bg-gradient-to-r from-orange-500 to-orange-600"></div>
-            <div className="p-8">
+            <div className="pt-10 px-8 pb-8">
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500/10 rounded-xl mb-4 group-hover:scale-110 transition-transform">
                   <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +186,7 @@ export default function Home() {
           {/* Premium Revenue Advance */}
           <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-charcoal-700 hover:border-purple-500 transition-all duration-300 overflow-hidden group shadow-xl hover:shadow-2xl hover:shadow-purple-500/20 transform hover:-translate-y-1">
             <div className="h-2 bg-gradient-to-r from-purple-500 to-purple-600"></div>
-            <div className="p-8">
+            <div className="pt-10 px-8 pb-8">
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-500/10 rounded-xl mb-4 group-hover:scale-110 transition-transform">
                   <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
