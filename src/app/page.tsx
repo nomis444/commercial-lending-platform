@@ -2,9 +2,9 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-charcoal-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#2d2d2d] to-[#1a1a1a]">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-charcoal-900 via-charcoal-800 to-charcoal-900">
+      <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,107,53,0.1),transparent_50%)]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(139,92,246,0.1),transparent_50%)]"></div>
         
@@ -38,8 +38,8 @@ export default function Home() {
       </div>
 
       {/* Stats Section */}
-      <div className="bg-charcoal-800 border-y border-charcoal-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-charcoal-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-charcoal-700/50 p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold text-electric-500 mb-2">$5K - $200K</div>
@@ -70,7 +70,7 @@ export default function Home() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {/* Instant Revenue Advance */}
-          <div className="bg-charcoal-800 rounded-2xl border-2 border-charcoal-700 hover:border-electric-500 transition-all duration-300 overflow-hidden group">
+          <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-charcoal-700 hover:border-electric-500 transition-all duration-300 overflow-hidden group shadow-xl hover:shadow-2xl hover:shadow-electric-500/20 transform hover:-translate-y-1">
             <div className="h-2 bg-gradient-to-r from-electric-500 to-electric-600"></div>
             <div className="p-8">
               <div className="text-center mb-6">
@@ -127,7 +127,7 @@ export default function Home() {
           </div>
 
           {/* Standard Revenue Advance - MOST POPULAR */}
-          <div className="bg-charcoal-800 rounded-2xl border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 overflow-hidden group relative transform md:scale-105">
+          <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 overflow-hidden group relative transform md:scale-105 shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-1">
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
               <span className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-1.5 rounded-full text-sm font-bold shadow-lg">
                 MOST POPULAR
@@ -189,7 +189,7 @@ export default function Home() {
           </div>
 
           {/* Premium Revenue Advance */}
-          <div className="bg-charcoal-800 rounded-2xl border-2 border-charcoal-700 hover:border-purple-500 transition-all duration-300 overflow-hidden group">
+          <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-charcoal-700 hover:border-purple-500 transition-all duration-300 overflow-hidden group shadow-xl hover:shadow-2xl hover:shadow-purple-500/20 transform hover:-translate-y-1">
             <div className="h-2 bg-gradient-to-r from-purple-500 to-purple-600"></div>
             <div className="p-8">
               <div className="text-center mb-6">
@@ -248,7 +248,7 @@ export default function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="bg-charcoal-800 py-20">
+      <div className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">
@@ -260,7 +260,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-charcoal-900 rounded-xl p-8 border border-charcoal-700 hover:border-orange-500 transition-colors">
+            <div className="bg-charcoal-900/50 backdrop-blur-sm rounded-xl p-8 border border-charcoal-700/50 hover:border-orange-500 transition-all shadow-lg hover:shadow-xl hover:shadow-orange-500/10 transform hover:-translate-y-1">
               <div className="w-14 h-14 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -274,7 +274,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-charcoal-900 rounded-xl p-8 border border-charcoal-700 hover:border-electric-500 transition-colors">
+            <div className="bg-charcoal-900/50 backdrop-blur-sm rounded-xl p-8 border border-charcoal-700/50 hover:border-electric-500 transition-all shadow-lg hover:shadow-xl hover:shadow-electric-500/10 transform hover:-translate-y-1">
               <div className="w-14 h-14 bg-electric-500/10 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-7 h-7 text-electric-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -289,7 +289,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-charcoal-900 rounded-xl p-8 border border-charcoal-700 hover:border-purple-500 transition-colors">
+            <div className="bg-charcoal-900/50 backdrop-blur-sm rounded-xl p-8 border border-charcoal-700/50 hover:border-purple-500 transition-all shadow-lg hover:shadow-xl hover:shadow-purple-500/10 transform hover:-translate-y-1">
               <div className="w-14 h-14 bg-purple-500/10 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
