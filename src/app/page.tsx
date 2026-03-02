@@ -63,7 +63,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mt-6">
+        <div className="grid md:grid-cols-3 gap-8 mt-12">
           {/* Instant Revenue Advance */}
           <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-charcoal-700 hover:border-electric-500 transition-all duration-300 overflow-hidden group shadow-xl hover:shadow-2xl hover:shadow-electric-500/20 transform hover:-translate-y-1">
             <div className="h-2 bg-gradient-to-r from-electric-500 to-electric-600"></div>
@@ -122,7 +122,7 @@ export default function Home() {
           </div>
 
           {/* Standard Revenue Advance - MOST POPULAR */}
-          <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 overflow-hidden group relative transform md:scale-105 shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-1">
+          <div className="bg-charcoal-800/60 backdrop-blur-sm rounded-2xl border-2 border-orange-500 hover:border-orange-400 transition-all duration-300 overflow-visible group relative transform md:scale-105 shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-1">
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
               <span className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-1.5 rounded-full text-sm font-bold shadow-lg">
                 MOST POPULAR
